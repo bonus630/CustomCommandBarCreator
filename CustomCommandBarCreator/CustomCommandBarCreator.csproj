@@ -7,7 +7,7 @@
     <ProjectGuid>{1346466F-9069-4BF5-B5F9-E3FEDEEB14DF}</ProjectGuid>
     <OutputType>WinExe</OutputType>
     <RootNamespace>CustomCommandBarCreator</RootNamespace>
-    <AssemblyName>CustomCommandBarCreator</AssemblyName>
+    <AssemblyName>CDRCommandBarBuilder</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <ProjectTypeGuids>{60dc8134-eba5-43b8-bcc9-bb4bc16c2548};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
@@ -32,6 +32,9 @@
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup>
+    <ApplicationIcon>icon.ico</ApplicationIcon>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -67,6 +70,7 @@
       <DependentUpon>App.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="Converters\BoolToVisibilityConverter.cs" />
     <Compile Include="Models\Extensions.cs" />
     <Compile Include="Models\StructureGenerator.cs" />
     <Compile Include="Models\XSLTGenerator.cs" />
@@ -108,9 +112,7 @@
   <ItemGroup>
     <None Include="App.config" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Converters\" />
-  </ItemGroup>
+  <ItemGroup />
   <ItemGroup>
     <Resource Include="Images\trash.png" />
   </ItemGroup>
@@ -125,6 +127,9 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Images\IconGroup104.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="icon.ico" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

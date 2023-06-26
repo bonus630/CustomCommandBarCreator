@@ -6,7 +6,6 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using static System.Windows.Forms.VisualStyles.VisualStyleElement.Window;
 using System.Windows.Documents;
 
 namespace CustomCommandBarCreator.Models
@@ -76,13 +75,13 @@ namespace CustomCommandBarCreator.Models
                 sb.Append(commandBar[i].Guid);
                 sb.Append("\" dynamicCommand = \"");
                 sb.Append(commandBar[i].Command);
-                sb.Append("\" dynamicCategory = \"2cc24a3e-fe24-4708-9a74-9c75406eebcd\" caption=\"");
+                sb.Append("\" dynamicCategory = \"2cc24a3e-fe24-4708-9a74-9c75406eebcd\" userCaption=\"");
                 sb.Append(commandBar[i].Caption);
                 sb.Append("\" icon=\"guid://");
                 sb.Append(commandBar[i].Guid);
-                sb.Append("\" enable=\"");
+                sb.Append("\" enable=\'");
                 sb.Append(commandBar[i].EnableCondition);
-                sb.AppendLine("\" />");
+                sb.AppendLine("\' />");
     
             }
             return sb.ToString();
@@ -120,14 +119,7 @@ namespace CustomCommandBarCreator.Models
         {
             if (!commandBar.HaveShortcut)
                 return "";
-            //            	<xsl:template match="uiConfig/shortcutKeyTables/table[@tableID='bc175625-191c-4b95-9053-756e5eee26fe']">
-            //	<xsl:copy>
-            //		<xsl:apply-templates select="@*|node()"/>
-            //	</xsl:copy>
-            //		<keySequence itemRef="5b38d7ec-528b-4cae-82c5-b463840146d1">
-            //		<key  ctrl="true">\</key>
-            //	</keySequence>
-            //</xsl:template>
+      
             StringBuilder sb = new StringBuilder();
             sb.AppendLine("<xsl:template match=\"uiConfig/shortcutKeyTables/table[@tableID='bc175625-191c-4b95-9053-756e5eee26fe']\">");
             sb.AppendLine("\t\t<xsl:copy>");
@@ -150,7 +142,8 @@ namespace CustomCommandBarCreator.Models
                 if (commandBar[i].Shortcut.Alt)
                     sb.Append(" alt=\"true\"");
                 sb.Append(">");
-                sb.Append("VK");
+                if(commandBar[i].Shortcut.Key.Length>1)
+                    sb.Append("VK");
                 sb.Append(commandBar[i].Shortcut.Key);
                 sb.AppendLine("</key>");
                 sb.AppendLine("\t\t</keySequence>");

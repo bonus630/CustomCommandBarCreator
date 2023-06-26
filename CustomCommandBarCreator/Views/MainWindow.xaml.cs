@@ -32,14 +32,19 @@ namespace CustomCommandBarCreator.Views
             commandBar.GmsPaths = new ObservableCollection<string>();
             commandBar.CommandItems = new System.Collections.ObjectModel.ObservableCollection<ModelViews.CommandItem>();
             this.DataContext = commandBar;
-
+         
+            //object obj = System.Runtime.InteropServices.Marshal.GetActiveObject("CorelDRAW.Application.18");
         }
         private void txt_PreviewKeyUP(object sender, KeyEventArgs e)
         {
             TextBox tb = sender as TextBox;
 
-
-
+            //if(tb.Text.Length==1)
+            //{
+            //    tb.Text = Enum.GetName(typeof(Key), e.Key);
+            //    e.Handled = true;
+            //    return;
+            //}
             if (e.Key == Key.Delete || e.Key == Key.Back)
             {
                 tb.Clear();
@@ -52,7 +57,16 @@ namespace CustomCommandBarCreator.Views
                 return;
             }
 
+            //tb.CaretIndex = 0;
+            //if (tb.Text.Length > 0)
+            //{
+            //    tb.Text = tb.Text.Substring(0, 1);
+
+            //}
+
             tb.Text = Enum.GetName(typeof(Key), e.Key);
+
+
 
         }
     }

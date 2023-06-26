@@ -4,8 +4,14 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:CustomCommandBarCreator.Views"
+        xmlns:converters="clr-namespace:CustomCommandBarCreator.Converters"
         mc:Ignorable="d"
-        Title="CommandBar Creator for VBA Macros" Height="600" Width="900">
+        Title="CorelDRW CommandBar Builder for VBA Macros" Height="600" Width="900">
+    <Window.Resources>
+        <ResourceDictionary>
+            <converters:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter" />
+        </ResourceDictionary>
+    </Window.Resources>
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="40" />
@@ -24,9 +30,17 @@
         <!--Files-->
         <Button Grid.Row="1" Grid.Column="0" Content="Add GMS Files" Margin="6" VerticalAlignment="Top"
                 Command="{Binding AddFileCommand}"/>
-        <ListView Grid.Row="1" Grid.Column="1" Margin="6" ItemsSource="{Binding GmsPaths}">
+        <ListView Grid.Row="1" Grid.Column="1" Margin="6" ItemsSource="{Binding GmsPaths}"
+                  SelectionMode="Single" SelectedItem="{Binding CurrentGMS}">
+            <!--<ListView.ItemContainerStyle>
+                <Style TargetType="ListViewItem">
+                    <EventSetter Event="MouseLeftButtonUp" 
+                                 Handler="{Binding CurrentGMSCommand,RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Window}}"/>
+                </Style>
+            </ListView.ItemContainerStyle>-->
             <ListView.View>
                 <GridView>
+                    
                     <GridViewColumn Header="Files" DisplayMemberBinding="{Binding}"/>
 
                     <GridViewColumn   Width="46" Header="Remove">
@@ -47,27 +61,36 @@
         <!--Items-->
         <Button Grid.Row="2" Grid.Column="0" Content="Add Command" Margin="6" VerticalAlignment="Top"
                 Command="{Binding AddCommandItemCommand}"/>
-        <ListView Grid.Row="2" Grid.Column="1" Margin="6" ItemsSource="{Binding CommandItems}">
+        <ListView Grid.Row="2" Grid.Column="1" Margin="6" ItemsSource="{Binding CommandItems}"
+                  SelectionMode="Single" >
+            <ListView.ItemContainerStyle>
+                <Style TargetType="ListViewItem">
+                    <Setter Property="IsSelected" Value="{Binding Selected}"/>
+                </Style>
+            </ListView.ItemContainerStyle>
             <ListView.View>
                 <GridView>
                     <GridViewColumn Header="Caption" Width="140" >
                         <GridViewColumn.CellTemplate>
                             <DataTemplate>
-                                <TextBox Text="{Binding Caption}" Width="120" Margin="2"/>
+                                <TextBox Text="{Binding Caption}" Width="120" Margin="2,0" Height="24" VerticalContentAlignment="Center"/>
                             </DataTemplate>
                         </GridViewColumn.CellTemplate>
                     </GridViewColumn>
                     <GridViewColumn Header="Command" Width="140">
                         <GridViewColumn.CellTemplate>
                             <DataTemplate>
-                                <TextBox Text="{Binding Command}" Width="120"  Margin="2"/>
+                                <!--<TextBox Text="{Binding Command}" Width="120"  Margin="2"/>-->
+                                <ComboBox ItemsSource="{Binding Commands}" SelectedItem="{Binding Command}" IsEditable="True" Width="120" Margin="2"/>
+
                             </DataTemplate>
                         </GridViewColumn.CellTemplate>
                     </GridViewColumn>
                     <GridViewColumn Header="Enable" Width="140"  >
                         <GridViewColumn.CellTemplate>
                             <DataTemplate>
-                                <TextBox Text="{Binding EnableCondition}" Width="120" Margin="2"/>
+                                <!--<TextBox Text="{Binding EnableCondition}" Width="120" Margin="2"/>-->
+                                <ComboBox ItemsSource="{Binding EnableConditions}" SelectedItem="{Binding EnableCondition}" IsEditable="True" Width="120" Margin="2"/>
                             </DataTemplate>
                         </GridViewColumn.CellTemplate>
                     </GridViewColumn>
@@ -75,10 +98,10 @@
                         <GridViewColumn.CellTemplate>
                             <DataTemplate>
                                 <StackPanel Orientation="Horizontal">
-                                    <CheckBox Content="Ctrl" IsChecked="{Binding Shortcut.Control}" HorizontalAlignment="Center" Margin="2"/>
-                                    <CheckBox Content="Shift"  IsChecked="{Binding Shortcut.Shift}" HorizontalAlignment="Center" Margin="2"/>
-                                    <CheckBox Content="Alt"  IsChecked="{Binding Shortcut.Alt}" HorizontalAlignment="Center" Margin="2"/>
-                                    <TextBox Text="{Binding Shortcut.Key}"  Width="60" Margin="2" PreviewKeyUp="txt_PreviewKeyUP"/>
+                                    <CheckBox Content="Ctrl" IsChecked="{Binding Shortcut.Control}" VerticalAlignment="Center" Margin="2"/>
+                                    <CheckBox Content="Shift"  IsChecked="{Binding Shortcut.Shift}" VerticalAlignment="Center" Margin="2"/>
+                                    <CheckBox Content="Alt"  IsChecked="{Binding Shortcut.Alt}" VerticalAlignment="Center" Margin="2"/>
+                                    <TextBox Text="{Binding Shortcut.Key}"  Width="60" Margin="2,0" Height="24" VerticalContentAlignment="Center" PreviewKeyUp="txt_PreviewKeyUP"/>
                                 </StackPanel>
                             </DataTemplate>
                         </GridViewColumn.CellTemplate>
@@ -110,6 +133,18 @@
             </ListView.View>
 
         </ListView>
-        <Button CommandParameter="{Binding}" Command="{Binding GenerateCommand}" Grid.Column="0" Grid.Row="3" Content="Generate" Width="80" Margin="6"/>
+        <Grid Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="2">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="120"/>
+                <ColumnDefinition Width="120"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <Button CommandParameter="{Binding}" Command="{Binding GenerateCommand}" Grid.Column="0" Grid.Row="0" Content="Generate"  Margin="6"/>
+            <Button CommandParameter="{Binding}" Command="{Binding AttachCorelDRWCommand}" Grid.Column="1" Grid.Row="0" Content="{Binding AttachButtonText}"  Margin="6"/>
+            <StackPanel Visibility="{Binding Attached,Converter={StaticResource BoolToVisibilityConverter}}" Orientation="Horizontal" Grid.Row="0" Grid.Column="2" VerticalAlignment="Center">
+                <Label Content="Sucess!" Foreground="#FF11A51A"/>
+                <Label Content="{Binding Version}"  Foreground="#FF11A51A"/>
+            </StackPanel>
+        </Grid>
     </Grid>
 </Window>

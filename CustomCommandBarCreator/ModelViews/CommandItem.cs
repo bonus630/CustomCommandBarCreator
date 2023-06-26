@@ -11,94 +11,146 @@ using System.Windows;
 using System.Windows.Media.Imaging;
 using CustomCommandBarCreator.Models;
 using System.IO;
+using System.Collections.ObjectModel;
 
 namespace CustomCommandBarCreator.ModelViews
 {
     public class CommandItem : ControlItem
     {
-		private string caption;
+        private string caption;
 
-		public string Caption
-		{
-			get { return caption; }
-			set { caption = value;
-				OnPropertyChanged();
-			}
-		}
+        public string Caption
+        {
+            get { return caption; }
+            set
+            {
+                caption = value;
+                OnPropertyChanged();
+            }
+        }
+        private bool selected = false;
+
+        public bool Selected
+        {
+            get { return selected; }
+            set { selected = value; OnPropertyChanged(); }
+        }
 
 
-		private string command;
+        private string command;
 
-		public string Command
-		{
-			get { return command; }
-			set { command = value;
-				OnPropertyChanged();
-			}
-		}
+        public string Command
+        {
+            get { return command; }
+            set
+            {
+                command = value;
+                OnPropertyChanged();
+            }
+        }
+        private ObservableCollection<string> commands = new ObservableCollection<string>() { ""};
 
-		private string enableCondition = "true";
+        public ObservableCollection<string> Commands
+        {
+            get { return commands; }
+            set
+            {
+                commands = value;
+                OnPropertyChanged();
+            }
+        }
+        private string enableCondition = "true";
 
-		public string EnableCondition
-		{
-			get { return enableCondition; }
-			set { enableCondition = value;
-				OnPropertyChanged();
-			}
-		}
+        public string EnableCondition
+        {
+            get { return enableCondition; }
+            set
+            {
+                enableCondition = value;
+                OnPropertyChanged();
+            }
+        }
+        private ObservableCollection<string> enableConditions =
+            new ObservableCollection<string>(){
+                "true",
+                "false",
+                "*Bind(DataSource=AppDS;Path=DocumentAvailable)",
+                "*Bind(DataSource=WPageDataSource;Path=CanInsertPage)",
+                "*GtrI(*Bind(DataSource=DrawingInfoDS;Path=NumObjects), 0)",
+                "*Bind(DataSource=WViewDataSource;Path=ToggleViewEnabled)"};
 
-		private ImageSource icon;
+        public ObservableCollection<string> EnableConditions
+        {
+            get { return enableConditions; }
+            set
+            {
+                enableConditions = value;
+                OnPropertyChanged();
+            }
+        }
 
-		public ImageSource Icon
-		{
-			get { return icon; }
-			set { icon = value;
-				OnPropertyChanged();
-			}
-		}
+        private ImageSource icon;
 
-		private string iconPath;
-        public string IconPath { get { return iconPath; } 
-			set { 
-				iconPath = value; 
-				
-				this.Icon = (new System.Drawing.Icon(iconPath).ToImageSource());	
-			} }
-		private Shortcut shortcut;
+        public ImageSource Icon
+        {
+            get { return icon; }
+            set
+            {
+                icon = value;
+                OnPropertyChanged();
+            }
+        }
 
-		public Shortcut Shortcut
-		{
-			get { return shortcut; }
-			set { shortcut = value;
-				OnPropertyChanged();
-			}
-		}
+        private string iconPath;
+        public string IconPath
+        {
+            get { return iconPath; }
+            set
+            {
+                iconPath = value;
+
+                this.Icon = (new System.Drawing.Icon(iconPath).ToImageSource());
+            }
+        }
+        private Shortcut shortcut;
+
+        public Shortcut Shortcut
+        {
+            get { return shortcut; }
+            set
+            {
+                shortcut = value;
+                OnPropertyChanged();
+            }
+        }
 
 
         public IntPtr IconID { get; set; }
 
-        public CommandItem():base()
+        public CommandItem() : base()
         {
-			this.Shortcut = new Shortcut();
+            this.Shortcut = new Shortcut();
 
-			string tempIconPath = Path.GetTempFileName();
+            string tempIconPath = Path.GetTempFileName();
+
+         
 
             using (FileStream fs = new FileStream(tempIconPath, FileMode.OpenOrCreate))
-			{
-				Properties.Resources.IconGroup104.Save(fs);
-			}
-			this.IconPath = tempIconPath;
+            {
+                Properties.Resources.IconGroup104.Save(fs);
+            }
+            this.IconPath = tempIconPath;
         }
-        public CommandItem(string caption, string command,string iconPath, string enableCondition = "true"):this()
+        public CommandItem(string caption, string command, string iconPath, string enableCondition = "true") : this()
         {
-			this.Caption = caption;
-			this.Command = command;
-			this.IconPath = iconPath;
-			this.Shortcut = shortcut;
-			this.EnableCondition = enableCondition;
-           
+            this.Caption = caption;
+            this.Command = command;
+            this.IconPath = iconPath;
+            this.Shortcut = shortcut;
+            this.EnableCondition = enableCondition;
+
         }
 
     }
-    
+
 }
