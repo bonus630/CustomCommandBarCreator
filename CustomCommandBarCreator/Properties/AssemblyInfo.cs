@@ -10,7 +10,7 @@ using System.Windows;
 [assembly: AssemblyTitle("CustomCommandBarCreator")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("")]
+[assembly: AssemblyCompany("bonus630")]
 [assembly: AssemblyProduct("CustomCommandBarCreator")]
 [assembly: AssemblyCopyright("Copyright ©  2022")]
 [assembly: AssemblyTrademark("")]

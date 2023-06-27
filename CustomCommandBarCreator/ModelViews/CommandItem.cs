@@ -1,17 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Linq;
-using System.Runtime.InteropServices;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Interop;
-using System.Windows.Media;
-using System.Windows;
-using System.Windows.Media.Imaging;
-using CustomCommandBarCreator.Models;
-using System.IO;
+﻿using CustomCommandBarCreator.Models;
+using System;
 using System.Collections.ObjectModel;
+using System.IO;
+using System.Windows.Media;
 
 namespace CustomCommandBarCreator.ModelViews
 {
@@ -28,7 +19,7 @@ namespace CustomCommandBarCreator.ModelViews
                 OnPropertyChanged();
             }
         }
-        private bool selected = false;
+        private bool selected;
 
         public bool Selected
         {
@@ -112,27 +103,39 @@ namespace CustomCommandBarCreator.ModelViews
                 this.Icon = (new System.Drawing.Icon(iconPath).ToImageSource());
             }
         }
-        private Shortcut shortcut;
+        private Shortcut[] shortcuts;
 
-        public Shortcut Shortcut
+        public Shortcut[] Shortcuts
         {
-            get { return shortcut; }
-            set
+            get { GenerateShortcuts(); return shortcuts; }
+           protected set
             {
-                shortcut = value;
-                OnPropertyChanged();
+                shortcuts = value;
+               
             }
         }
 
+        private string shortcutText;
 
+        public string ShortcutText
+        {
+            get { 
+                return shortcutText; }
+            set
+            {
+                shortcutText = value;
+                OnPropertyChanged();
+               
+            }
+        }
         public IntPtr IconID { get; set; }
 
         public CommandItem() : base()
         {
-            this.Shortcut = new Shortcut();
+           
 
             string tempIconPath = Path.GetTempFileName();
-
+            this.Selected = true;
          
 
             using (FileStream fs = new FileStream(tempIconPath, FileMode.OpenOrCreate))
@@ -146,9 +149,36 @@ namespace CustomCommandBarCreator.ModelViews
             this.Caption = caption;
             this.Command = command;
             this.IconPath = iconPath;
-            this.Shortcut = shortcut;
+          
             this.EnableCondition = enableCondition;
 
+        }
+        private void GenerateShortcuts()
+        {
+            //ctrl+shift+alt+
+            string[] pes = shortcutText.Split(new char[] {',' }, StringSplitOptions.RemoveEmptyEntries);
+            shortcuts = new Shortcut[pes.Length];
+            for (int i = 0; i < pes.Length; i++)
+            {
+                Shortcut s = new Shortcut();
+                if (pes[i].Contains("ctrl+"))
+                {
+                    s.Control = true;
+                    pes[i]= pes[i].Replace("ctrl+", "");
+                }
+                if (pes[i].Contains("shift+"))
+                {
+                    s.Shift = true;
+                    pes[i]=pes[i].Replace("shift+", "");
+                }
+                if (pes[i].Contains("alt+"))
+                {
+                    s.Alt = true;
+                    pes[i]=pes[i].Replace("alt+", "");
+                }
+                s.Key = pes[i].Trim();
+                shortcuts[i] = s;
+            }
         }
 
     }

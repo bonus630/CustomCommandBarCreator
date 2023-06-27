@@ -123,33 +123,42 @@ namespace CustomCommandBarCreator.Models
             StringBuilder sb = new StringBuilder();
             sb.AppendLine("<xsl:template match=\"uiConfig/shortcutKeyTables/table[@tableID='bc175625-191c-4b95-9053-756e5eee26fe']\">");
             sb.AppendLine("\t\t<xsl:copy>");
-            sb.AppendLine("\t\t\t<xsl:apply-templates select=\"@*|node()\"/>");
-            sb.AppendLine("\t\t</xsl:copy>");
+            sb.AppendLine("\t\t\t<xsl:copy-of select=\"@*\"/>");
+          
 
             for (int i = 0; i < commandBar.Count; i++)
             {
-                if (string.IsNullOrEmpty(commandBar[i].Shortcut.Key))
+                if (commandBar[i].Shortcuts.Length==0)
                     continue;
                 sb.Append("\t\t<keySequence itemRef=\"");
                 sb.Append(commandBar[i].Guid);
                 sb.AppendLine("\">");
-                sb.Append("\t\t<key");
 
-                if (commandBar[i].Shortcut.Control)
-                    sb.Append(" ctrl=\"true\"");
-                if (commandBar[i].Shortcut.Shift)
-                    sb.Append(" shift=\"true\"");
-                if (commandBar[i].Shortcut.Alt)
-                    sb.Append(" alt=\"true\"");
-                sb.Append(">");
-                if(commandBar[i].Shortcut.Key.Length>1)
-                    sb.Append("VK");
-                sb.Append(commandBar[i].Shortcut.Key);
-                sb.AppendLine("</key>");
+
+                for (int s = 0; s < commandBar[i].Shortcuts.Length; s++)
+                {
+
+
+                    sb.Append("\t\t<key");
+                    if (commandBar[i].Shortcuts[s].Control)
+                        sb.Append(" ctrl=\"true\"");
+                    if (commandBar[i].Shortcuts[s].Shift)
+                        sb.Append(" shift=\"true\"");
+                    if (commandBar[i].Shortcuts[s].Alt)
+                        sb.Append(" alt=\"true\"");
+                    sb.Append(">");
+                    if (commandBar[i].Shortcuts[s].Key.Length > 1)
+                        sb.Append("VK_");
+                    sb.Append(commandBar[i].Shortcuts[s].Key);
+                    sb.AppendLine("</key>");
+                }
+
+
+
                 sb.AppendLine("\t\t</keySequence>");
             }
 
-
+            sb.AppendLine("\t\t</xsl:copy>");
             sb.AppendLine("</xsl:template>");
 
 

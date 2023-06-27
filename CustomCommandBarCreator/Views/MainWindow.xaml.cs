@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
@@ -12,7 +14,7 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
-using System.Windows.Shapes;
+
 
 
 namespace CustomCommandBarCreator.Views
@@ -26,6 +28,10 @@ namespace CustomCommandBarCreator.Views
 
         public MainWindow()
         {
+            string vestris = "Vestris.ResourceLib.dll";
+            string appPath  = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)+"\\"+vestris;
+            if (!File.Exists(appPath))
+                File.WriteAllBytes(appPath,Properties.Resources.Vestris_ResourceLib);
             InitializeComponent();
 
             commandBar = new ModelViews.CommandBar();
@@ -53,6 +59,7 @@ namespace CustomCommandBarCreator.Views
             }
             if (e.Key == Key.LeftAlt || e.Key == Key.LeftCtrl || e.Key == Key.LeftShift)
             {
+                tb.Text = "CTRL+";
                 e.Handled = true;
                 return;
             }
@@ -64,7 +71,7 @@ namespace CustomCommandBarCreator.Views
 
             //}
 
-            tb.Text = Enum.GetName(typeof(Key), e.Key);
+            tb.Text = Enum.GetName(typeof(Key), e.Key).ToUpper();
 
 
 

@@ -130,4 +130,7 @@
   <data name="UserUI" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\UserUI.xslt;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;Windows-1252</value>
   </data>
+  <data name="Vestris_ResourceLib" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\bin\Release\Vestris.ResourceLib.dll;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
 </root>

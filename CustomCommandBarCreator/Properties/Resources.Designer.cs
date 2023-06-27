@@ -121,5 +121,15 @@ namespace CustomCommandBarCreator.Properties {
                 return ResourceManager.GetString("UserUI", resourceCulture);
             }
         }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Byte[].
+        /// </summary>
+        internal static byte[] Vestris_ResourceLib {
+            get {
+                object obj = ResourceManager.GetObject("Vestris_ResourceLib", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
     }
 }

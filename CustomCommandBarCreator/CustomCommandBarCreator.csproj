@@ -62,6 +62,10 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Page Include="Custom\ShortcutTextBox.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Views\MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -70,7 +74,11 @@
       <DependentUpon>App.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="Converters\BoolToWidthConverter.cs" />
     <Compile Include="Converters\BoolToVisibilityConverter.cs" />
+    <Compile Include="Custom\ShortcutTextBox.xaml.cs">
+      <DependentUpon>ShortcutTextBox.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Models\Extensions.cs" />
     <Compile Include="Models\StructureGenerator.cs" />
     <Compile Include="Models\XSLTGenerator.cs" />
@@ -112,7 +120,9 @@
   <ItemGroup>
     <None Include="App.config" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Resource Include="Images\CheckAdd.png" />
+  </ItemGroup>
   <ItemGroup>
     <Resource Include="Images\trash.png" />
   </ItemGroup>
@@ -130,6 +140,16 @@
   </ItemGroup>
   <ItemGroup>
     <Resource Include="icon.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="bin\Release\Vestris.ResourceLib.dll" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\checked.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\Add.png" />
+    <Resource Include="Images\BuildSelection.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

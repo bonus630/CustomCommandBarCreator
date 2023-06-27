@@ -12,22 +12,29 @@ namespace CustomCommandBarCreator.Models
 {
     public class StructureGenerator
     {
-        string folder;
+        public string Folder { get; protected set; }
         readonly int StartIconId = 100;
-        public void CreateBar(CommandBar bar)
+        public bool CreateBar(CommandBar bar)
         {
-            SelectFolder();
-            CreateCorelAddon();
-            CreateXSLT(bar);
-            CopyGMS(bar);
-            InsertIcons(bar);
-            CreateConfigXml(bar);
-            System.Diagnostics.Process.Start(folder);
+            bool result = false;
+            try
+            {
+                SelectFolder();
+                CreateCorelAddon();
+                CreateXSLT(bar);
+                CopyGMS(bar);
+                InsertIcons(bar);
+                CreateConfigXml(bar);
+                result = true;
+            }
+            catch { }
+            System.Diagnostics.Process.Start(Folder);
+            return result;
         }
 
         private void CreateXSLT(CommandBar commandBar)
         {
-            XSLTGenerator generator = new XSLTGenerator(commandBar, this.folder);
+            XSLTGenerator generator = new XSLTGenerator(commandBar, this.Folder);
             generator.GenerateAppUI();
             generator.GenerateUserUI();
         }
@@ -38,13 +45,13 @@ namespace CustomCommandBarCreator.Models
                 if (File.Exists(bar.GmsPaths[i]))
                 {
                     string fileName = bar.GmsPaths[i].Substring(bar.GmsPaths[i].LastIndexOf('\\'));
-                    File.Copy(bar.GmsPaths[i],this.folder+fileName);
+                    File.Copy(bar.GmsPaths[i],this.Folder+fileName);
                 }
             }
         }
         private void InsertIcons(CommandBar bar)
         {
-            string assembly = string.Format("{0}\\Resources.dll",this.folder);
+            string assembly = string.Format("{0}\\Resources.dll",this.Folder);
             File.WriteAllBytes(assembly, Properties.Resources.IconsResources);
             ushort iconMaxId = GetMaxIconId(assembly);
 
@@ -90,7 +97,7 @@ namespace CustomCommandBarCreator.Models
                     SelectFolder();
                     return;
                 }
-                folder = fbd.SelectedPath;
+                Folder = fbd.SelectedPath;
             }
         }
 
@@ -118,11 +125,13 @@ namespace CustomCommandBarCreator.Models
             sb.AppendLine("</resources>");
             sb.AppendLine("</config>");
 
-            File.WriteAllText(string.Format("{0}\\config.xml", this.folder), sb.ToString());
+            File.WriteAllText(string.Format("{0}\\config.xml", this.Folder), sb.ToString());
         }
         private void CreateCorelAddon()
         {
-            File.Create(string.Format("{0}\\Coreldrw.addon", this.folder));
+            FileStream fs = File.Create(string.Format("{0}\\Coreldrw.addon", this.Folder));
+            fs.Close();
+            fs.Dispose();
         }
     }
 }

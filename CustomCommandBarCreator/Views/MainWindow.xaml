@@ -5,11 +5,13 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:CustomCommandBarCreator.Views"
         xmlns:converters="clr-namespace:CustomCommandBarCreator.Converters"
+        xmlns:custom="clr-namespace:CustomCommandBarCreator.Custom"
         mc:Ignorable="d"
-        Title="CorelDRW CommandBar Builder for VBA Macros" Height="600" Width="900">
+        Title="CorelDRW CommandBar Builder for VBA Macros" Height="600" Width="940">
     <Window.Resources>
         <ResourceDictionary>
             <converters:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter" />
+            <converters:BoolToWidthConverter x:Key="BoolToWidthConverter" />
         </ResourceDictionary>
     </Window.Resources>
     <Grid>
@@ -28,8 +30,14 @@
 
 
         <!--Files-->
-        <Button Grid.Row="1" Grid.Column="0" Content="Add GMS Files" Margin="6" VerticalAlignment="Top"
-                Command="{Binding AddFileCommand}"/>
+        <Button Grid.Row="1" Grid.Column="0"  Margin="6" VerticalAlignment="Top"
+                Command="{Binding AddFileCommand}" ToolTip="Add a GMS to copy in final folder">
+            <StackPanel Orientation="Horizontal">
+                <Image Source="/Images/Add.png" Width="20"/>
+                <Label Content="Add GMS Files"/>
+            </StackPanel>
+        </Button>
+
         <ListView Grid.Row="1" Grid.Column="1" Margin="6" ItemsSource="{Binding GmsPaths}"
                   SelectionMode="Single" SelectedItem="{Binding CurrentGMS}">
             <!--<ListView.ItemContainerStyle>
@@ -40,9 +48,21 @@
             </ListView.ItemContainerStyle>-->
             <ListView.View>
                 <GridView>
-                    
-                    <GridViewColumn Header="Files" DisplayMemberBinding="{Binding}"/>
 
+                    <GridViewColumn Header="Files" DisplayMemberBinding="{Binding}"/>
+                    <GridViewColumn   Width="{Binding DataContext.Attached,RelativeSource={RelativeSource AncestorType=Window,Mode=FindAncestor},Converter={StaticResource BoolToWidthConverter}}" Header="Set">
+
+                        <GridViewColumn.CellTemplate>
+
+                            <DataTemplate>
+                                <Button Background="{x:Null}" BorderBrush="{x:Null}" Width="28" Height="28"
+                                     CommandParameter="{Binding}" Command="{Binding DataContext.SetCommand,RelativeSource={RelativeSource AncestorType=Window,Mode=FindAncestor}}"   >
+                                    <Image Source="/Images/CheckAdd.png" />
+                                    <Button.ToolTip>Set the list of macros in this file to selected commands command list</Button.ToolTip>
+                                </Button>
+                            </DataTemplate>
+                        </GridViewColumn.CellTemplate>
+                    </GridViewColumn>
                     <GridViewColumn   Width="46" Header="Remove">
                         <GridViewColumn.CellTemplate>
                             <DataTemplate>
@@ -59,10 +79,14 @@
 
         </ListView>
         <!--Items-->
-        <Button Grid.Row="2" Grid.Column="0" Content="Add Command" Margin="6" VerticalAlignment="Top"
-                Command="{Binding AddCommandItemCommand}"/>
+        <Button Grid.Row="2" Grid.Column="0"  Margin="6" VerticalAlignment="Top"
+                Command="{Binding AddCommandItemCommand}">
+                <StackPanel Orientation="Horizontal"><Image Source="/Images/Add.png" Width="20"/>
+                <Label Content="Add Command"/>
+            </StackPanel>
+        </Button>
         <ListView Grid.Row="2" Grid.Column="1" Margin="6" ItemsSource="{Binding CommandItems}"
-                  SelectionMode="Single" >
+                  SelectionMode="Extended" >
             <ListView.ItemContainerStyle>
                 <Style TargetType="ListViewItem">
                     <Setter Property="IsSelected" Value="{Binding Selected}"/>
@@ -70,6 +94,14 @@
             </ListView.ItemContainerStyle>
             <ListView.View>
                 <GridView>
+                    <GridViewColumn  Width="28" >
+                        <GridViewColumn.CellTemplate>
+                            <DataTemplate>
+                                <Image Source="/Images/checked.png" Width="16"
+                                       Visibility="{Binding Selected,Converter={StaticResource BoolToVisibilityConverter}}"/>
+                            </DataTemplate>
+                        </GridViewColumn.CellTemplate>
+                    </GridViewColumn>
                     <GridViewColumn Header="Caption" Width="140" >
                         <GridViewColumn.CellTemplate>
                             <DataTemplate>
@@ -97,12 +129,13 @@
                     <GridViewColumn Header="Shortcut" Width="Auto"  >
                         <GridViewColumn.CellTemplate>
                             <DataTemplate>
-                                <StackPanel Orientation="Horizontal">
+                                <custom:ShortcutTextBox Text="{Binding ShortcutText}" Margin="2,0" Width="120" Height="24" VerticalContentAlignment="Center" />
+                                <!--<StackPanel Orientation="Horizontal">
                                     <CheckBox Content="Ctrl" IsChecked="{Binding Shortcut.Control}" VerticalAlignment="Center" Margin="2"/>
                                     <CheckBox Content="Shift"  IsChecked="{Binding Shortcut.Shift}" VerticalAlignment="Center" Margin="2"/>
                                     <CheckBox Content="Alt"  IsChecked="{Binding Shortcut.Alt}" VerticalAlignment="Center" Margin="2"/>
                                     <TextBox Text="{Binding Shortcut.Key}"  Width="60" Margin="2,0" Height="24" VerticalContentAlignment="Center" PreviewKeyUp="txt_PreviewKeyUP"/>
-                                </StackPanel>
+                                </StackPanel>-->
                             </DataTemplate>
                         </GridViewColumn.CellTemplate>
                     </GridViewColumn>
@@ -136,13 +169,31 @@
         <Grid Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="2">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="120"/>
-                <ColumnDefinition Width="120"/>
+                <ColumnDefinition Width="140"/>
                 <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
-            <Button CommandParameter="{Binding}" Command="{Binding GenerateCommand}" Grid.Column="0" Grid.Row="0" Content="Generate"  Margin="6"/>
+            <Button CommandParameter="{Binding}" Command="{Binding GenerateCommand}"  Grid.Column="0" Grid.Row="0"   Margin="6" ToolTip="generate your command bar compose files">
+                <Button.Style>
+                    <Style TargetType="Button">
+                        <Setter Property="Background" Value="#FF11A51A"/>
+                        <Style.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Background" Value="#FF084403" />
+                            </Trigger>
+                        </Style.Triggers>
+                    </Style>
+                </Button.Style>
+                <StackPanel Orientation="Horizontal">
+                    <Image Source="/Images/BuildSelection.png" Width="20"/>
+                    <Label Content="Generate" Foreground="White" FontWeight="Bold"/>
+                </StackPanel>
+            </Button>
             <Button CommandParameter="{Binding}" Command="{Binding AttachCorelDRWCommand}" Grid.Column="1" Grid.Row="0" Content="{Binding AttachButtonText}"  Margin="6"/>
             <StackPanel Visibility="{Binding Attached,Converter={StaticResource BoolToVisibilityConverter}}" Orientation="Horizontal" Grid.Row="0" Grid.Column="2" VerticalAlignment="Center">
-                <Label Content="Sucess!" Foreground="#FF11A51A"/>
+              
+                <Label Content="Sucess!" Foreground="#FF11A51A"/> 
+                <Button Content="Send To" Visibility="{Binding IsAdmin,Converter={StaticResource BoolToVisibilityConverter}}" Command="{Binding SendToCommand}"
+                       ToolTip="Send To Addon Folder" />
                 <Label Content="{Binding Version}"  Foreground="#FF11A51A"/>
             </StackPanel>
         </Grid>

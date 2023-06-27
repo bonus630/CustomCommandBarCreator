@@ -3,11 +3,15 @@ using Microsoft.Win32;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
+using System.Security.Principal;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
+
 using System.Windows.Input;
 
 namespace CustomCommandBarCreator.ModelViews
@@ -46,7 +50,7 @@ namespace CustomCommandBarCreator.ModelViews
             set
             {
                 currentGMS = value;
-                CurrentGMSSelect(value);
+
                 OnPropertyChanged();
             }
         }
@@ -57,6 +61,14 @@ namespace CustomCommandBarCreator.ModelViews
         {
             get { return attached; }
             set { attached = value; OnPropertyChanged(); }
+        }
+
+        private bool isAdmin;
+
+        public bool IsAdmin
+        {
+            get { return isAdmin; }
+            set { isAdmin = value; OnPropertyChanged(); }
         }
 
         private string version;
@@ -72,7 +84,9 @@ namespace CustomCommandBarCreator.ModelViews
         public string AttachButtonText
         {
             get { return attachButtonText; }
-            set { attachButtonText = value;
+            set
+            {
+                attachButtonText = value;
                 OnPropertyChanged();
             }
         }
@@ -85,6 +99,8 @@ namespace CustomCommandBarCreator.ModelViews
         public RelayCommand<CommandItem> RemoveCommandItemCommand { get; set; }
         public RelayCommand<CommandItem> AddIconCommand { get; set; }
         public RelayCommand<object> AttachCorelDRWCommand { get; set; }
+        public RelayCommand<object> SendToCommand { get; set; }
+        public RelayCommand<string> SetCommand { get; set; }
 
 
 
@@ -98,7 +114,12 @@ namespace CustomCommandBarCreator.ModelViews
             RemoveCommandItemCommand = new RelayCommand<CommandItem>(RemoveCommandItem);
             AddIconCommand = new RelayCommand<CommandItem>(AddIcon);
             AttachCorelDRWCommand = new RelayCommand<object>(AttachCorelDRW);
+            SendToCommand = new RelayCommand<object>(SendTo);
+            SetCommand = new RelayCommand<string>(CurrentGMSSelect);
 
+            WindowsPrincipal principal = new WindowsPrincipal(WindowsIdentity.GetCurrent());
+            IsAdmin = principal.IsInRole(WindowsBuiltInRole.Administrator);
+            
         }
 
         private void CurrentGMSSelect(string obj)
@@ -127,7 +148,10 @@ namespace CustomCommandBarCreator.ModelViews
             for (int i = 0; i < this.Count; i++)
             {
                 if (this[i].Selected)
+                {
                     this[i].Commands = result;
+                    this[i].Command = result[0];
+                }
             }
         }
         object app = null;
@@ -147,17 +171,48 @@ namespace CustomCommandBarCreator.ModelViews
             }
             else
             {
-                Type pia_type = Type.GetTypeFromProgID("CorelDRAW.Application");
-                app = Activator.CreateInstance(pia_type);
-                if (app != null)
+                Thread thread = new Thread(() =>
                 {
-                    this.Attached = true;
-                    Version = string.Format("{0} {1}", (app as dynamic).Name, (app as dynamic).Version);
-                    AttachButtonText = "Deattach";
+                    AttachButtonText = "Please Wait!";
+                    Type pia_type = Type.GetTypeFromProgID("CorelDRAW.Application");
+                    app = Activator.CreateInstance(pia_type);
+                    if (app != null)
+                    {
+                        
+                        this.Attached = true;
+                        Version = string.Format("{0} {1}", (app as dynamic).Name, (app as dynamic).Version);
+                        AttachButtonText = "Deattach";
+                    }
+                });
+                thread.IsBackground = true;
+                thread.Start(); 
+            }
+        }
+        public void SendTo(object obj)
+        {
+            if(attached)
+            {
+                string addonPath = (app as dynamic).AddonPath;
+                if (!this.resultFolder.Equals(string.Empty))
+                {
+                    try
+                    {
+                        DirectoryInfo di = new DirectoryInfo(this.resultFolder);
+                        DirectoryInfo addonDir =  Directory.CreateDirectory(Path.Combine(addonPath, di.Name));
+
+                        FileInfo[] files = di.GetFiles();
+
+                        for (int i = 0; i < files.Length; i++)
+                        {
+                            files[i].CopyTo(Path.Combine(addonDir.FullName, files[i].Name),true);
+                        }
+
+                    }
+                    catch { }
                 }
             }
         }
-
+      
         private bool CanGenereteBar(CommandBar bar)
         {
             if (!string.IsNullOrEmpty(bar.Name))
@@ -195,21 +250,30 @@ namespace CustomCommandBarCreator.ModelViews
         private void AddIcon(CommandItem item)
         {
             string iconPath = GetFilePath(FileType.ICON)[0];
+            FileInfo fi = new FileInfo(iconPath);
+            if(!fi.Extension.Equals(".ico"))
+            {
+                iconPath = this.ContertToIcon(iconPath);
+            }
             if (File.Exists(iconPath))
                 item.IconPath = iconPath;
         }
+        private string resultFolder = string.Empty;
         private void GenereteBar(CommandBar bar)
         {
             for (int i = 0; i < this.Count; i++)
             {
-                if (!string.IsNullOrEmpty(this[i].Shortcut.Key))
+                if (!string.IsNullOrEmpty(this[i].ShortcutText))
                 {
                     this.HaveShortcut = true;
                     break;
                 }
             }
             StructureGenerator generator = new StructureGenerator();
-            generator.CreateBar(bar);
+            if (generator.CreateBar(bar))
+                resultFolder = generator.Folder;
+            else
+                resultFolder = string.Empty;
         }
         public void AddCommandItem(CommandItem command, string gmsPath)
         {
@@ -231,6 +295,7 @@ namespace CustomCommandBarCreator.ModelViews
         {
             OpenFileDialog ofd = new OpenFileDialog();
 
+
             string filter = "";
             string title = "";
             bool multiselect = false;
@@ -238,7 +303,7 @@ namespace CustomCommandBarCreator.ModelViews
             switch (type)
             {
                 case FileType.ICON:
-                    filter = "Icon (*.ico)|*.ico";
+                    filter = "Images or Icon|*.ico; *.bmp;*.jpg;*.jpeg;*.png;*.gif;*.tif;*.tiff";
                     title = "Select your icon!";
                     multiselect = false;
                     break;
@@ -261,14 +326,20 @@ namespace CustomCommandBarCreator.ModelViews
 
         }
 
-
-
-
-
-
-
-
-
+        public string ContertToIcon(string imagePath)
+        {
+            string iconPath = Path.GetTempFileName();
+            iconPath = iconPath.Replace(".tmp", ".ico");
+            using (Bitmap bitmap = new Bitmap(imagePath))
+            {
+                Icon icon = Icon.FromHandle(bitmap.GetHicon());
+                using (System.IO.FileStream stream = new System.IO.FileStream(iconPath, System.IO.FileMode.Create))
+                {
+                    icon.Save(stream);
+                }
+            }
+            return iconPath;
+        }
     }
     enum FileType
     {
