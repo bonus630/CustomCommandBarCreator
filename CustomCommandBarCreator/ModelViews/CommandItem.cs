@@ -100,7 +100,11 @@ namespace CustomCommandBarCreator.ModelViews
             {
                 iconPath = value;
 
-                this.Icon = (new System.Drawing.Icon(iconPath).ToImageSource());
+                try
+                {
+                    this.Icon = (new System.Drawing.Icon(iconPath).ToImageSource());
+                }
+                catch { }
             }
         }
         private Shortcut[] shortcuts;

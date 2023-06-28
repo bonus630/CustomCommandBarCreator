@@ -249,7 +249,10 @@ namespace CustomCommandBarCreator.ModelViews
         }
         private void AddIcon(CommandItem item)
         {
-            string iconPath = GetFilePath(FileType.ICON)[0];
+            object o = GetFilePath(FileType.ICON);
+            if (o == null)
+                return;
+            string iconPath = (o as string[])[0];
             FileInfo fi = new FileInfo(iconPath);
             if(!fi.Extension.Equals(".ico"))
             {

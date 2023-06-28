@@ -48,7 +48,14 @@
             </ListView.ItemContainerStyle>-->
             <ListView.View>
                 <GridView>
-
+                    <!--<GridViewColumn  Width="28" >
+                        <GridViewColumn.CellTemplate>
+                            <DataTemplate>
+                                <Image Source="/Images/checked.png" Width="16"
+                                       Visibility="{Binding Selected,Converter={StaticResource BoolToVisibilityConverter}}"/>
+                            </DataTemplate>
+                        </GridViewColumn.CellTemplate>
+                    </GridViewColumn>-->
                     <GridViewColumn Header="Files" DisplayMemberBinding="{Binding}"/>
                     <GridViewColumn   Width="{Binding DataContext.Attached,RelativeSource={RelativeSource AncestorType=Window,Mode=FindAncestor},Converter={StaticResource BoolToWidthConverter}}" Header="Set">
 
@@ -175,7 +182,8 @@
             <Button CommandParameter="{Binding}" Command="{Binding GenerateCommand}"  Grid.Column="0" Grid.Row="0"   Margin="6" ToolTip="generate your command bar compose files">
                 <Button.Style>
                     <Style TargetType="Button">
-                        <Setter Property="Background" Value="#FF11A51A"/>
+                        <Setter Property="Background" Value="#FF232523"/>
+                        <Setter Property="BorderBrush" Value="#FFB16911"/>
                         <Style.Triggers>
                             <Trigger Property="IsMouseOver" Value="True">
                                 <Setter Property="Background" Value="#FF084403" />
