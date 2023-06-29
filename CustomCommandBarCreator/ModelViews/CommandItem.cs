@@ -104,7 +104,10 @@ namespace CustomCommandBarCreator.ModelViews
                 {
                     this.Icon = (new System.Drawing.Icon(iconPath).ToImageSource());
                 }
-                catch { }
+                catch 
+                {
+                    System.Windows.MessageBox.Show("Unable to process this image, please select another one!");
+                }
             }
         }
         private Shortcut[] shortcuts;

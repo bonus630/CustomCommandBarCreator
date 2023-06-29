@@ -107,7 +107,10 @@ namespace CustomCommandBarCreator.Models
             sb.AppendLine("<?xml version=\"1.0\"?>");
             sb.AppendLine("<config>");
             sb.AppendLine("<resources>");
-            sb.AppendLine("<resource name=\"MyResource\" path=\"Resources.dll\">");
+            sb.Append("<resource name=\"");
+            sb.Append(Guid.NewGuid().ToString()); 
+            sb.AppendLine("\" path=\"Resources.dll\">");
+            
             sb.AppendLine("<resourceMap>");
 
             for (int i = 0; i < commandBar.Count; i++)
