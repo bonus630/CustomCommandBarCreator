@@ -13,10 +13,7 @@
 	<xsl:template match="uiConfig/items">
 		<xsl:copy>
 			<xsl:apply-templates select="node()|@*"/>
-			<!-- <itemData guid="4f11a0df-ab6b-4151-8e60-fadf0a1924f7"
-					  type="wpfhost"
-					  hostedType="Addons\GuiadeAtalhosCorelnaVeia\GuiadeAtalhosCorelnaVeia.dll,GuiadeAtalhosCorelnaVeia.ControlUI"
-					 /> -->
+	
 	$itemsApp$
 			</xsl:copy>
 	</xsl:template>
