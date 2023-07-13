@@ -19,7 +19,7 @@ namespace CustomCommandBarCreator.ModelViews
     public class CommandBar : ControlItem
     {
         private ObservableCollection<string> gmsPaths;
-
+       
         public ObservableCollection<string> GmsPaths
         {
             get { return gmsPaths; }
@@ -90,7 +90,13 @@ namespace CustomCommandBarCreator.ModelViews
                 OnPropertyChanged();
             }
         }
+        private int commandLeft = 100;
 
+        public int CommandLeft
+        {
+            get { return commandLeft; }
+            set { commandLeft = value; OnPropertyChanged(); }
+        }
 
         public RelayCommand<CommandBar> GenerateCommand { get; set; }
         public RelayCommand<string> AddFileCommand { get; set; }
@@ -109,7 +115,7 @@ namespace CustomCommandBarCreator.ModelViews
 
             GenerateCommand = new RelayCommand<CommandBar>(GenereteBar, CanGenereteBar);
             AddFileCommand = new RelayCommand<string>(AddFile);
-            AddCommandItemCommand = new RelayCommand<CommandItem>(AddCommandItem);
+            AddCommandItemCommand = new RelayCommand<CommandItem>(AddCommandItem,CanAddCommandItem);
             RemoveFileCommand = new RelayCommand<string>(RemoveFile);
             RemoveCommandItemCommand = new RelayCommand<CommandItem>(RemoveCommandItem);
             AddIconCommand = new RelayCommand<CommandItem>(AddIcon);
@@ -151,6 +157,7 @@ namespace CustomCommandBarCreator.ModelViews
                 {
                     this[i].Commands = result;
                     this[i].Command = result[0];
+                    this[i].GmsPath = obj.Substring(obj.LastIndexOf("\\") + 1).Split('.')[0];
                 }
             }
         }
@@ -236,8 +243,12 @@ namespace CustomCommandBarCreator.ModelViews
         private void AddCommandItem(CommandItem item)
         {
             this.CommandItems.Add(new CommandItem());
+            this.CommandLeft--;
         }
-
+        private bool CanAddCommandItem(CommandItem item)
+        {
+            return this.CommandLeft > 0;
+        }
         private void RemoveFile(string file)
         {
             this.GmsPaths.Remove(file);
@@ -246,6 +257,7 @@ namespace CustomCommandBarCreator.ModelViews
         private void RemoveCommandItem(CommandItem item)
         {
             this.CommandItems.Remove(item);
+            this.CommandLeft++;
         }
         private void AddIcon(CommandItem item)
         {

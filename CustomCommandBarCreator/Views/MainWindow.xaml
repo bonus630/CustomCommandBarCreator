@@ -86,12 +86,21 @@
 
         </ListView>
         <!--Items-->
-        <Button Grid.Row="2" Grid.Column="0"  Margin="6" VerticalAlignment="Top"
+        <StackPanel Grid.Row="2" Grid.Column="0">
+        <Button   Margin="6" VerticalAlignment="Top"
                 Command="{Binding AddCommandItemCommand}">
+           
                 <StackPanel Orientation="Horizontal"><Image Source="/Images/Add.png" Width="20"/>
                 <Label Content="Add Command"/>
             </StackPanel>
+                
+           
         </Button>
+            <StackPanel Orientation="Horizontal">
+            <Label Content="Left:" Width="85"/>
+            <Label Content="{Binding CommandLeft,FallbackValue=100}" HorizontalAlignment="Right"/>
+            </StackPanel>
+        </StackPanel>
         <ListView Grid.Row="2" Grid.Column="1" Margin="6" ItemsSource="{Binding CommandItems}"
                   SelectionMode="Extended" >
             <ListView.ItemContainerStyle>

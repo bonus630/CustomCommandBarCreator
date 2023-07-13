@@ -6,15 +6,16 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Controls;
 using System.Windows.Documents;
 
 namespace CustomCommandBarCreator.Models
 {
     public class XSLTGenerator
     {
-		private readonly string[] Flags = new string[] {"$itemsUser$","$itemsApp$","$GuidA$","$Caption$","$itemsRef$","$Shortcuts$" };
+        private readonly string[] Flags = new string[] { "$itemsUser$", "$itemsApp$", "$GuidA$", "$Caption$", "$itemsRef$", "$Shortcuts$","$GuidB$","$Folder$" };
 
-		string itemsUser = "", itemsApp = "", GuidA = "", Caption = "", itemsRef = "", Shortcuts = "";
+        string itemsUser = "", itemsApp = "", GuidA = "", Caption = "", itemsRef = "", Shortcuts = "",GuidB ="",Folder="";
 
         private CommandBar commandBar;
         private string folder;
@@ -24,6 +25,8 @@ namespace CustomCommandBarCreator.Models
             this.commandBar = commandBar;
             this.folder = folder;
             this.GuidA = commandBar.Guid;
+            this.GuidB = Guid.NewGuid().ToString();
+            this.Folder = folder;
             this.Caption = commandBar.Name;
             this.Shortcuts = generateShortcut();
         }
@@ -36,7 +39,7 @@ namespace CustomCommandBarCreator.Models
 
 
             userui = userui.Replace(Flags[2], this.GuidA);
-       
+            userui = userui.Replace(Flags[6], this.GuidB);
             userui = userui.Replace(Flags[0], itemsUser);
             userui = userui.Replace(Flags[5], Shortcuts);
 
@@ -51,14 +54,16 @@ namespace CustomCommandBarCreator.Models
         }
         public void GenerateAppUI()
         {
-			
+
             string path = string.Format("{0}\\AppUI.xslt", folder);
             string appui = Properties.Resources.AppUI;
-            itemsApp = generateItemAPP();
+            itemsApp = generateItemAPP2();
             itemsRef = generateItemREF();
 
             appui = appui.Replace(Flags[1], itemsApp);
             appui = appui.Replace(Flags[2], this.GuidA);
+            appui = appui.Replace(Flags[6], this.GuidB);
+            appui = appui.Replace(Flags[7], this.Folder);
             appui = appui.Replace(Flags[3], Caption);
             appui = appui.Replace(Flags[4], itemsRef);
             appui = appui.Replace(Flags[5], Shortcuts);
@@ -82,10 +87,37 @@ namespace CustomCommandBarCreator.Models
                 sb.Append("\" enable=\'");
                 sb.Append(commandBar[i].EnableCondition);
                 sb.AppendLine("\' />");
-    
+
             }
             return sb.ToString();
         }
+        private string generateItemAPP2()
+        {
+
+    //            < itemData type = "button"  onInvoke = "*Bind(DataSource=GMSLoaderDS;Path=LoadGMG)"
+
+    //guid = "a51aba1c-836c-411d-bea3-e75d1057fb0e"  userCaption = "Teste"
+
+    //icon = "guid://a51aba1c-836c-411d-bea3-e75d1057fb0e" enable = 'true' />
+            StringBuilder sb = new StringBuilder();
+            for (int i = 0; i < commandBar.Count; i++)
+            {
+                sb.Append("<itemData guid=\"");
+                sb.Append(commandBar[i].Guid);
+                sb.Append("\" onInvoke = \"*Bind(DataSource=GMSLoaderDS;Path=LoadGMS");
+                sb.Append(i.ToString("000"));
+                sb.Append(")\" type = \"button\" userCaption=\"");
+                sb.Append(commandBar[i].Caption);
+                sb.Append("\" icon=\"guid://");
+                sb.Append(commandBar[i].Guid);
+                sb.Append("\" enable=\'");
+                sb.Append(commandBar[i].EnableCondition);
+                sb.AppendLine("\' />");
+
+            }
+            return sb.ToString();
+        }
+
         private string generateItemUSER()
         {
             StringBuilder sb = new StringBuilder();
@@ -119,16 +151,16 @@ namespace CustomCommandBarCreator.Models
         {
             if (!commandBar.HaveShortcut)
                 return "";
-      
+
             StringBuilder sb = new StringBuilder();
             sb.AppendLine("<xsl:template match=\"uiConfig/shortcutKeyTables/table[@tableID='bc175625-191c-4b95-9053-756e5eee26fe']\">");
             sb.AppendLine("\t\t<xsl:copy>");
             sb.AppendLine("\t\t\t<xsl:copy-of select=\"@*\"/>");
-          
+
 
             for (int i = 0; i < commandBar.Count; i++)
             {
-                if (commandBar[i].Shortcuts.Length==0)
+                if (commandBar[i].Shortcuts.Length == 0)
                     continue;
                 sb.Append("\t\t<keySequence itemRef=\"");
                 sb.Append(commandBar[i].Guid);

@@ -135,6 +135,17 @@ namespace CustomCommandBarCreator.ModelViews
                
             }
         }
+        private string gmsPath;
+
+        public string GmsPath
+        {
+            get { return gmsPath; }
+            set
+            {
+                gmsPath = value;
+                OnPropertyChanged();
+            }
+        }
         public IntPtr IconID { get; set; }
 
         public CommandItem() : base()

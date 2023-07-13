@@ -17,6 +17,9 @@
 	<xsl:template match="commandBarData[@guid='$GuidA$']/toolbar">
 		<xsl:copy>
 			<xsl:apply-templates select="node()|@*"/>
+			<xsl:if test="not(./item[@guidRef='$GuidB$'])">
+				<item guidRef="$GuidB$"/>
+			</xsl:if>
 		$itemsUser$
 		</xsl:copy>
 	</xsl:template>

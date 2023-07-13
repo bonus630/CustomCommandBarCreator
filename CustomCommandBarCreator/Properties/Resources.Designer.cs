@@ -76,11 +76,21 @@ namespace CustomCommandBarCreator.Properties {
         ///	&lt;xsl:template match=&quot;uiConfig/items&quot;&gt;
         ///		&lt;xsl:copy&gt;
         ///			&lt;xsl:apply-templates select=&quot;node()|@*&quot;/&gt;
-        ///			 [rest of string was truncated]&quot;;.
+        ///		&lt; [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string AppUI {
             get {
                 return ResourceManager.GetString("AppUI", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Byte[].
+        /// </summary>
+        internal static byte[] GMSLoader {
+            get {
+                object obj = ResourceManager.GetObject("GMSLoader", resourceCulture);
+                return ((byte[])(obj));
             }
         }
         
@@ -100,6 +110,16 @@ namespace CustomCommandBarCreator.Properties {
         internal static byte[] IconsResources {
             get {
                 object obj = ResourceManager.GetObject("IconsResources", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Byte[].
+        /// </summary>
+        internal static byte[] ProjectHelper {
+            get {
+                object obj = ResourceManager.GetObject("ProjectHelper", resourceCulture);
                 return ((byte[])(obj));
             }
         }
