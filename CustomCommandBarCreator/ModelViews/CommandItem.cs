@@ -28,7 +28,7 @@ namespace CustomCommandBarCreator.ModelViews
         }
 
 
-        private string command;
+        private string command = String.Empty;
 
         public string Command
         {
@@ -36,6 +36,7 @@ namespace CustomCommandBarCreator.ModelViews
             set
             {
                 command = value;
+                this.IsOk = true;
                 OnPropertyChanged();
             }
         }
@@ -47,6 +48,7 @@ namespace CustomCommandBarCreator.ModelViews
             set
             {
                 commands = value;
+                
                 OnPropertyChanged();
             }
         }
@@ -135,7 +137,7 @@ namespace CustomCommandBarCreator.ModelViews
                
             }
         }
-        private string gmsPath;
+        private string gmsPath = String.Empty;
 
         public string GmsPath
         {
@@ -143,9 +145,24 @@ namespace CustomCommandBarCreator.ModelViews
             set
             {
                 gmsPath = value;
+                this.IsOk = true;
                 OnPropertyChanged();
             }
         }
+
+        private bool isOk = false;
+
+        public bool IsOk
+        {
+            get { return this.isOk; }
+            protected set
+            {
+                this.isOk = (!String.IsNullOrEmpty(this.Command) && !String.IsNullOrEmpty(this.GmsPath));
+                OnPropertyChanged();
+            }
+        }
+
+
         public IntPtr IconID { get; set; }
 
         public CommandItem() : base()

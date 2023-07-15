@@ -95,7 +95,7 @@ namespace GMSLoader.DataSource
                 gmp = ControlUI.corelApp.GMSManager.Projects.Load(path);
                 projects.Add(gmp);
             }
-            ControlUI.corelApp.GMSManager.RunMacro(module, macro);
+            ControlUI.corelApp.GMSManager.RunMacro(module, macro,null);
 
 
         }

@@ -1,25 +1,23 @@
 ﻿using CustomCommandBarCreator.Models;
 using Microsoft.Win32;
 using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Security.Principal;
-using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
-
-using System.Windows.Input;
+using System.Windows.Threading;
 
 namespace CustomCommandBarCreator.ModelViews
 {
     public class CommandBar : ControlItem
     {
+        // private bool canGenerate = false;
+
         private ObservableCollection<string> gmsPaths;
-       
+
         public ObservableCollection<string> GmsPaths
         {
             get { return gmsPaths; }
@@ -39,6 +37,18 @@ namespace CustomCommandBarCreator.ModelViews
             {
                 commandItems = value;
                 OnPropertyChanged();
+            }
+        }
+
+        private string name;
+        public new string Name
+        {
+            get { return name; }
+            set
+            {
+                name = value;
+                OnPropertyChanged();
+                GenerateCommand.RaiseCanExecuteChanged();
             }
         }
 
@@ -98,6 +108,9 @@ namespace CustomCommandBarCreator.ModelViews
             set { commandLeft = value; OnPropertyChanged(); }
         }
 
+        public ObservableCollection<CorelVersionInfo> CorelVersions { get; set; }
+
+
         public RelayCommand<CommandBar> GenerateCommand { get; set; }
         public RelayCommand<string> AddFileCommand { get; set; }
         public RelayCommand<CommandItem> AddCommandItemCommand { get; set; }
@@ -107,6 +120,8 @@ namespace CustomCommandBarCreator.ModelViews
         public RelayCommand<object> AttachCorelDRWCommand { get; set; }
         public RelayCommand<object> SendToCommand { get; set; }
         public RelayCommand<string> SetCommand { get; set; }
+        public RelayCommand<string> LinkCommand { get; set; }
+        public RelayCommand<CorelVersionInfo> InstallCommand { get; set; }
 
 
 
@@ -115,17 +130,32 @@ namespace CustomCommandBarCreator.ModelViews
 
             GenerateCommand = new RelayCommand<CommandBar>(GenereteBar, CanGenereteBar);
             AddFileCommand = new RelayCommand<string>(AddFile);
-            AddCommandItemCommand = new RelayCommand<CommandItem>(AddCommandItem,CanAddCommandItem);
+            AddCommandItemCommand = new RelayCommand<CommandItem>(AddCommandItem, CanAddCommandItem);
             RemoveFileCommand = new RelayCommand<string>(RemoveFile);
             RemoveCommandItemCommand = new RelayCommand<CommandItem>(RemoveCommandItem);
             AddIconCommand = new RelayCommand<CommandItem>(AddIcon);
             AttachCorelDRWCommand = new RelayCommand<object>(AttachCorelDRW);
             SendToCommand = new RelayCommand<object>(SendTo);
             SetCommand = new RelayCommand<string>(CurrentGMSSelect);
+            LinkCommand = new RelayCommand<string>(LinkGMSSelect);
+            InstallCommand = new RelayCommand<CorelVersionInfo>(Install,CanInstall);
+
 
             WindowsPrincipal principal = new WindowsPrincipal(WindowsIdentity.GetCurrent());
             IsAdmin = principal.IsInRole(WindowsBuiltInRole.Administrator);
-            
+            FillCorelVersion();
+        }
+        private void FillCorelVersion()
+        {
+            this.CorelVersions = new ObservableCollection<CorelVersionInfo>();
+            for (int i = CorelVersionInfo.MinVersion; i < CorelVersionInfo.MaxVersion; i++)
+            {
+                CorelVersionInfo cvi = new CorelVersionInfo(i);
+                if (!cvi.CorelInstallationNotFound)
+                    this.CorelVersions.Add(cvi);
+            }
+            OnPropertyChanged("CorelVersions");
+
         }
 
         private void CurrentGMSSelect(string obj)
@@ -160,8 +190,21 @@ namespace CustomCommandBarCreator.ModelViews
                     this[i].GmsPath = obj.Substring(obj.LastIndexOf("\\") + 1).Split('.')[0];
                 }
             }
+            GenerateCommand.RaiseCanExecuteChanged();
+        }
+        private void LinkGMSSelect(string obj)
+        {
+            for (int i = 0; i < this.Count; i++)
+            {
+                if (this[i].Selected)
+                {
+                    this[i].GmsPath = obj.Substring(obj.LastIndexOf("\\") + 1).Split('.')[0];
+                }
+            }
+            GenerateCommand.RaiseCanExecuteChanged();
         }
         object app = null;
+        private int cdrVersion;
         private void AttachCorelDRW(object obj)
         {
             if (attached)
@@ -185,19 +228,20 @@ namespace CustomCommandBarCreator.ModelViews
                     app = Activator.CreateInstance(pia_type);
                     if (app != null)
                     {
-                        
+
                         this.Attached = true;
+                        cdrVersion = (app as dynamic).VersionMajor;
                         Version = string.Format("{0} {1}", (app as dynamic).Name, (app as dynamic).Version);
                         AttachButtonText = "Deattach";
                     }
                 });
                 thread.IsBackground = true;
-                thread.Start(); 
+                thread.Start();
             }
         }
         public void SendTo(object obj)
         {
-            if(attached)
+            if (attached)
             {
                 string addonPath = (app as dynamic).AddonPath;
                 if (!this.resultFolder.Equals(string.Empty))
@@ -205,13 +249,13 @@ namespace CustomCommandBarCreator.ModelViews
                     try
                     {
                         DirectoryInfo di = new DirectoryInfo(this.resultFolder);
-                        DirectoryInfo addonDir =  Directory.CreateDirectory(Path.Combine(addonPath, di.Name));
+                        DirectoryInfo addonDir = Directory.CreateDirectory(Path.Combine(addonPath, di.Name));
 
                         FileInfo[] files = di.GetFiles();
 
                         for (int i = 0; i < files.Length; i++)
                         {
-                            files[i].CopyTo(Path.Combine(addonDir.FullName, files[i].Name),true);
+                            files[i].CopyTo(Path.Combine(addonDir.FullName, files[i].Name), true);
                         }
 
                     }
@@ -219,12 +263,15 @@ namespace CustomCommandBarCreator.ModelViews
                 }
             }
         }
-      
+
         private bool CanGenereteBar(CommandBar bar)
         {
-            if (!string.IsNullOrEmpty(bar.Name))
-                return true;
-            return true;
+            if (string.IsNullOrEmpty(Name) || this.Count == 0)
+            {
+                return false;
+
+            }
+            return !this.commandItems.Any(r => r.IsOk == false);
         }
 
         private void AddFile(string obj)
@@ -244,6 +291,8 @@ namespace CustomCommandBarCreator.ModelViews
         {
             this.CommandItems.Add(new CommandItem());
             this.CommandLeft--;
+            AddCommandItemCommand.RaiseCanExecuteChanged();
+            GenerateCommand.RaiseCanExecuteChanged();
         }
         private bool CanAddCommandItem(CommandItem item)
         {
@@ -252,12 +301,21 @@ namespace CustomCommandBarCreator.ModelViews
         private void RemoveFile(string file)
         {
             this.GmsPaths.Remove(file);
+            for (int i = 0; i < this.Count; i++)
+            {
+
+                if (this[i].GmsPath.Equals(file.Substring(file.LastIndexOf("\\") + 1).Split('.')[0]))
+                    this[i].GmsPath = String.Empty;
+
+            }
             OnPropertyChanged(nameof(GmsPaths));
+            GenerateCommand.RaiseCanExecuteChanged();
         }
         private void RemoveCommandItem(CommandItem item)
         {
             this.CommandItems.Remove(item);
             this.CommandLeft++;
+            AddCommandItemCommand.RaiseCanExecuteChanged();
         }
         private void AddIcon(CommandItem item)
         {
@@ -266,7 +324,7 @@ namespace CustomCommandBarCreator.ModelViews
                 return;
             string iconPath = (o as string[])[0];
             FileInfo fi = new FileInfo(iconPath);
-            if(!fi.Extension.Equals(".ico"))
+            if (!fi.Extension.Equals(".ico"))
             {
                 iconPath = this.ContertToIcon(iconPath);
             }
@@ -286,7 +344,11 @@ namespace CustomCommandBarCreator.ModelViews
             }
             StructureGenerator generator = new StructureGenerator();
             if (generator.CreateBar(bar))
+            {
+
                 resultFolder = generator.Folder;
+                generator.CreateDataSource(resultFolder, cdrVersion);
+            }
             else
                 resultFolder = string.Empty;
         }
@@ -295,6 +357,7 @@ namespace CustomCommandBarCreator.ModelViews
             if (!GmsPaths.Contains(gmsPath))
                 GmsPaths.Add(gmsPath);
             CommandItems.Add(command);
+
         }
 
         public CommandItem this[int index]
@@ -339,6 +402,59 @@ namespace CustomCommandBarCreator.ModelViews
             }
             return null;
 
+        }
+        private void Install(CorelVersionInfo version)
+        {
+            if (version == null)
+                return;
+            try
+            {
+            
+                StructureGenerator generator = new StructureGenerator();
+                resultFolder = generator.SelectBarFolder();
+
+                if (!this.resultFolder.Equals(string.Empty))
+                {
+                    try
+                    {
+                        generator.BuildDataSourceFinish += () =>
+                        {
+                            string addonPath = "";
+                            if (version.Corel64Bit == CorelVersionInfo.CorelIs64Bit.Corel32)
+                                version.CorelAddonsPath(out addonPath);
+                            else
+                                version.CorelAddonsPath64(out addonPath);
+                            DirectoryInfo di = new DirectoryInfo(this.resultFolder);
+                            DirectoryInfo addonDir = Directory.CreateDirectory(Path.Combine(addonPath, di.Name));
+
+                            FileInfo[] files = di.GetFiles();
+
+                            for (int i = 0; i < files.Length; i++)
+                            {
+                                files[i].CopyTo(Path.Combine(addonDir.FullName, files[i].Name), true);
+                            }
+                           
+                        };
+                        generator.CreateDataSource(resultFolder, version.CorelVersion);
+
+
+                    }
+                    catch {
+                     
+                    }
+                }
+
+
+            }
+            catch
+            {
+
+            }
+        }
+        private bool canInstall = true;
+        private bool CanInstall(CorelVersionInfo version)
+        {
+            return canInstall;
         }
 
         public string ContertToIcon(string imagePath)

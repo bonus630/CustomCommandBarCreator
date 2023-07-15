@@ -1,15 +1,12 @@
 ﻿using CustomCommandBarCreator.ModelViews;
+
 using System;
-using System.Collections.Generic;
 using System.IO;
+using System.IO.Compression;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Documents;
 using System.Windows.Forms;
-
 using Vestris.ResourceLib;
-using System.IO.Compression;
 
 namespace CustomCommandBarCreator.Models
 {
@@ -17,15 +14,17 @@ namespace CustomCommandBarCreator.Models
     {
         public string Folder { get; protected set; }
         readonly int StartIconId = 100;
+        public event Action BuildDataSourceFinish;
+
         public bool CreateBar(CommandBar bar)
         {
             bool result = false;
             try
             {
 
-                CreateDataSource();
-                return result;
-                SelectFolder();
+
+                if (!SelectFolderEmpty())
+                    return false;
 
                 CreateCorelAddon();
                 CreateXSLT(bar);
@@ -37,10 +36,16 @@ namespace CustomCommandBarCreator.Models
                 result = true;
             }
             catch { }
-            System.Diagnostics.Process.Start(Folder);
+            
             return result;
         }
-
+        public void CreateDataSource(string folder,int version)
+        {
+            string projectDir = UnzipFiles();
+            CreateTargetFile(projectDir,folder);
+            BuildDataSource(projectDir, version);
+           
+        }
         private void CreateXSLT(CommandBar commandBar)
         {
             XSLTGenerator generator = new XSLTGenerator(commandBar, this.Folder);
@@ -95,7 +100,7 @@ namespace CustomCommandBarCreator.Models
             }
             return 0;
         }
-        private void SelectFolder()
+        private bool SelectFolderEmpty()
         {
             FolderBrowserDialog fbd = new FolderBrowserDialog();
             fbd.Description = "Select a empty Folder";
@@ -104,13 +109,34 @@ namespace CustomCommandBarCreator.Models
                 string path = fbd.SelectedPath;
                 if (Directory.GetFiles(path).Length > 0)
                 {
-                    SelectFolder();
-                    return;
+                    SelectFolderEmpty();
+                    return false;
                 }
                 Folder = fbd.SelectedPath;
+                return true;
             }
+            return false;
         }
-
+        public string SelectBarFolder()
+        {
+            FolderBrowserDialog fbd = new FolderBrowserDialog();
+            fbd.Description = "Select your bar folder";
+            if (fbd.ShowDialog() == DialogResult.OK)
+            {
+                string path = fbd.SelectedPath;
+                DirectoryInfo di = new DirectoryInfo(path);
+                FileInfo[] fi = di.GetFiles("Coreldrw.addon");
+                if(fi.Length == 0)
+                {
+                    MessageBox.Show("Invalid Directory!");
+                    SelectBarFolder();
+                }
+                return path;
+             
+              
+            }
+            return string.Empty;
+        }
         private void WriteTable(CommandBar bar)
 
         {
@@ -129,10 +155,6 @@ namespace CustomCommandBarCreator.Models
                     fs.Write(size, 0, 4);
                     position += 4;
                 }
-
-
-
-
                 for (int i = 0; i < bar.Count; i++)
                 {
                     size = Encoding.UTF8.GetBytes(string.Format("{0}${1}", bar[i].GmsPath, bar[i].Command));
@@ -144,9 +166,6 @@ namespace CustomCommandBarCreator.Models
                     fs.Position = fs.Length;
                 }
             }
-
-
-
         }
 
         private void CreateConfigXml(CommandBar commandBar)
@@ -185,13 +204,14 @@ namespace CustomCommandBarCreator.Models
             fs.Dispose();
 
         }
-        private void CreateDataSource()
+        private string UnzipFiles()
         {
 
 
             string extractFolder = Path.GetTempPath();
-            if (!Directory.Exists(Path.Combine(Path.GetTempPath(), "GMSLoader")))
-                Directory.CreateDirectory(Path.Combine(Path.GetTempPath(), "GMSLoader"));
+            string projectDir = Path.Combine(Path.GetTempPath(), "GMSLoader");
+            if (!Directory.Exists(projectDir))
+                Directory.CreateDirectory(projectDir);
 
             string zip = string.Format("{0}GMSLoader.zip", extractFolder);
             File.WriteAllBytes(zip, Properties.Resources.GMSLoader);
@@ -221,8 +241,34 @@ namespace CustomCommandBarCreator.Models
                 }
 
             }
+            return projectDir;
 
         }
+
+        private void CreateTargetFile(string projectDir,string barFolder)
+        {
+            TargetsCreator tc = new TargetsCreator();
+            tc.WriteTargetsFile(projectDir,barFolder);
+        }
+        private void BuildDataSource(string projectDir,int corelVersion)
+        {
+            Builder builder = new Builder();
+            builder.ProjectPath = string.Format("{0}\\GMSLoader.csproj",projectDir);
+            builder.CorelVersion = corelVersion;
+           
+            builder.Finish += (b) =>
+            {
+                if (b)
+                {
+                    BuildDataSourceFinish?.Invoke();
+                   
+
+                }
+            }; 
+            builder.Run();
+        }
+
+
     }
 }
 
