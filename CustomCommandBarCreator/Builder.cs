@@ -54,7 +54,7 @@ namespace CustomCommandBarCreator
 
             Process psi = new Process();
             //ProcessStartInfo psi = new ProcessStartInfo();
-            psi.StartInfo.CreateNoWindow = true;
+            psi.StartInfo.CreateNoWindow = false;
             psi.StartInfo.UseShellExecute = false;
             psi.EnableRaisingEvents = true;
             psi.StartInfo.FileName = msbuildPath;
@@ -68,8 +68,8 @@ namespace CustomCommandBarCreator
             psi.ErrorDataReceived += Psi_ErrorDataReceived;
             psi.Exited += Psi_Exited;
             psi.Start();
-            psi.BeginOutputReadLine();
-            psi.BeginErrorReadLine();
+            //psi.BeginOutputReadLine();
+           // psi.BeginErrorReadLine();
             //psi.WaitForExit();
             //psi.CancelOutputRead();
             //psi.CancelErrorRead();
