@@ -1,4 +1,4 @@
-# Custom Shortcut Bar for CorelDRAW Macros
+# Custom Shortcut Bar Builder for CorelDRAW Macros
 This repository contains a tool for generating custom shortcut bars for macros in CorelDRAW. With this tool, you can create a personalized bar of macros and save it to an empty folder. Later, this folder needs to be copied to the CorelDRAW installation directory, specifically in the **addons folder**. This will allow the shortcut bar to be created using CorelDRAW's addon system.
 
 Administrator privileges is required to use install function, install function rebuilds "DataSource" DLL, maybe is necessary after sharing your bar with a diferen version. 
