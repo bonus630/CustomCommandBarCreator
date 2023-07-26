@@ -132,7 +132,7 @@
                     <GridViewColumn  Width="28" >
                         <GridViewColumn.CellTemplate>
                             <DataTemplate>
-                                <Image Source="/Images/checked.png" Width="16"
+                                <Image Source="/Images/checked.png" Width="16" ToolTip="Selected"
                                        Visibility="{Binding Selected,Converter={StaticResource BoolToVisibilityConverter}}"/>
                             </DataTemplate>
                         </GridViewColumn.CellTemplate>

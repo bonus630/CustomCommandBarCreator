@@ -279,8 +279,15 @@ namespace CustomCommandBarCreator.ModelViews
             string[] files = GetFilePath(FileType.GMS);
             if (files == null)
                 return;
-            Properties.Settings.Default.LastGMSFolder = files[0].Substring(0, files[0].LastIndexOf("\\"));
-            Properties.Settings.Default.Save();
+            try
+            {
+                Properties.Settings.Default.LastGMSFolder = files[0].Substring(0, files[0].LastIndexOf("\\"));
+                Properties.Settings.Default.Save();
+            }
+            catch
+            {
+
+            }
             for (int i = 0; i < files.Length; i++)
             {
                 if (File.Exists(files[i]) && !this.gmsPaths.Contains(files[i]))
@@ -388,7 +395,11 @@ namespace CustomCommandBarCreator.ModelViews
                 case FileType.GMS:
                     filter = "GMS Files (*.gms)|*.gms";
                     title = "Select your GMS files!";
-                    startFolder = Properties.Settings.Default.LastGMSFolder;
+                    try
+                    {
+                        startFolder = Properties.Settings.Default.LastGMSFolder;
+                    }
+                    catch { }
                     multiselect = true;
                     break;
             }

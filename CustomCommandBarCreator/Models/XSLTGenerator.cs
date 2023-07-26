@@ -20,7 +20,7 @@ namespace CustomCommandBarCreator.Models
             this.folder = folder;
             this.GuidA = commandBar.Guid;
             this.GuidB = Guid.NewGuid().ToString();
-            this.Folder = folder;
+            this.Folder = (new DirectoryInfo(folder)).Name;
             this.Caption = commandBar.Name;
             this.Shortcuts = generateShortcut();
         }
