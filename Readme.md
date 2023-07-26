@@ -51,8 +51,6 @@ https://github.com/dblock/resourcelib
 
 ![PrintScreen 01](print.PNG)
 
-![Demo](https://youtu.be/ItBmEawJO10)
-
 ## Advantages
 
 1. Preservation of the custom bar: When restoring CorelDRAW to its factory default settings, our custom bar will not be lost. It will remain available for use even after the restoration.
@@ -64,4 +62,3 @@ https://github.com/dblock/resourcelib
 1. Macro loading timing: Macros are loaded when the shortcut bar is opened, and they do not benefit from CorelDRAW's macro delay loading system.(V1.0)
 2. Duplicate macros in multiple bars: Macros that are repeated in multiple bars will be loaded multiple times according to the number of bars that contain them.
 Additionally, this software provides a faster creation speed compared to CorelDRAW's native customization system.(V1.0)
-
