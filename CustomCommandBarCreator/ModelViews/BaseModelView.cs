@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 
 namespace CustomCommandBarCreator.ModelViews
 {
+    [Serializable]
     public class BaseModelView : INotifyPropertyChanged
     {
         public event PropertyChangedEventHandler PropertyChanged;

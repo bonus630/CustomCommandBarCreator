@@ -7,6 +7,7 @@ using System.Xml.Linq;
 
 namespace CustomCommandBarCreator.ModelViews
 {
+    [Serializable]
     public abstract class ControlItem : BaseModelView
     {
         public string Guid { get; protected set; }

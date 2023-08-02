@@ -2,6 +2,7 @@
 using System;
 using System.IO;
 using System.Text;
+using System.Text.RegularExpressions;
 
 namespace CustomCommandBarCreator.Models
 {
@@ -13,6 +14,7 @@ namespace CustomCommandBarCreator.Models
 
         private CommandBar commandBar;
         private string folder;
+        public string DsName { get; protected set; }
 
         public XSLTGenerator(CommandBar commandBar, string folder)
         {
@@ -23,6 +25,7 @@ namespace CustomCommandBarCreator.Models
             this.Folder = (new DirectoryInfo(folder)).Name;
             this.Caption = commandBar.Name;
             this.Shortcuts = generateShortcut();
+            DsName = RandomNameGenarator();
         }
 
         public void GenerateUserUI()
@@ -38,12 +41,6 @@ namespace CustomCommandBarCreator.Models
             userui = userui.Replace(Flags[5], Shortcuts);
 
             File.WriteAllText(path, userui);
-
-
-
-
-
-
 
         }
         public void GenerateAppUI()
@@ -88,7 +85,7 @@ namespace CustomCommandBarCreator.Models
         private string generateItemAPP2()
         {
 
-    //            < itemData type = "button"  onInvoke = "*Bind(DataSource=GMSLoaderDS;Path=LoadGMG)"
+    //< itemData type = "button"  onInvoke = "*Bind(DataSource=GMSLoaderDS;Path=LoadGMG)"
 
     //guid = "a51aba1c-836c-411d-bea3-e75d1057fb0e"  userCaption = "Teste"
 
@@ -98,7 +95,9 @@ namespace CustomCommandBarCreator.Models
             {
                 sb.Append("<itemData guid=\"");
                 sb.Append(commandBar[i].Guid);
-                sb.Append("\" onInvoke = \"*Bind(DataSource=GMSLoaderDS;Path=LoadGMS");
+                sb.Append("\" onInvoke = \"*Bind(DataSource=");
+                sb.Append(DsName);
+                sb.Append("; Path=LoadGMS");
                 sb.Append(i.ToString("000"));
                 sb.Append(")\" type = \"button\" userCaption=\"");
                 sb.Append(commandBar[i].Caption);
@@ -189,6 +188,36 @@ namespace CustomCommandBarCreator.Models
 
 
             return sb.ToString();
+        }
+        public static string GetDataSourceName(string appUiPath)
+        {
+            string text = File.ReadAllText(appUiPath);
+            Regex rg = new Regex("Bind(DataSource=?<dataSourceName>(GMS([A-H0-9]{6})DS);Path=LoadGMS", RegexOptions.Compiled);
+            Match match = rg.Match(text);
+
+            string dsName = match.Result("${dataSourceName}");
+            return dsName;
+
+
+        }
+        private string RandomNameGenarator()
+        {
+           // $DataSourceName$
+            StringBuilder sb = new StringBuilder();
+
+            sb.Append("GMS");
+
+            char[] chars = { 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9' };
+
+            Random Rd = new Random();
+
+            for (int i = 0; i < 6; i++) {
+               sb.Append(chars[Rd.Next(0, chars.Length)]);
+            }
+
+            sb.Append("DS");
+            return sb.ToString();
+
         }
     }
 }

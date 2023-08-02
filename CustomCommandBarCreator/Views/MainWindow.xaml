@@ -19,41 +19,50 @@
         </ResourceDictionary>
 
     </Window.Resources>
-    <Grid>
-        <Grid.RowDefinitions>
-            <RowDefinition Height="40" />
-            <RowDefinition  />
-            <RowDefinition  />
-            <RowDefinition Height="40" />
-        </Grid.RowDefinitions>
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="120"/>
-            <ColumnDefinition Width="*" />
-        </Grid.ColumnDefinitions>
-        <Label Grid.Row="0" Grid.Column="0" Content="CommandBar Name" VerticalAlignment="Center"/>
-        <TextBox Grid.Row="0" Grid.Column="1" Margin="6" Text="{Binding Name}" VerticalContentAlignment="Center"/>
+    <DockPanel LastChildFill="True">
+        <Grid  DockPanel.Dock="Top" Height="28" VerticalAlignment="Center" >
+            <Menu Margin="0,6,0,0">
+                <MenuItem Header="File" VerticalAlignment="Center">
+                    <MenuItem Header="Save" CommandParameter="{Binding}" Command="{Binding SaveBarCommand}" IsEnabled="True"/>
+                    <MenuItem Header="Load" Command="{Binding LoadBarCommand}" />
+                </MenuItem>
+            </Menu>
+        </Grid>
+        <Grid DockPanel.Dock="Bottom">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="40" />
+                <RowDefinition  />
+                <RowDefinition  />
+                <RowDefinition Height="40" />
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="120"/>
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+            <Label Grid.Row="0" Grid.Column="0" Content="CommandBar Name" VerticalAlignment="Center"/>
+            <TextBox Grid.Row="0" Grid.Column="1" Margin="6" Text="{Binding Name}" VerticalContentAlignment="Center"/>
 
 
-        <!--Files-->
-        <Button Grid.Row="1" Grid.Column="0"  Margin="6" VerticalAlignment="Top"
+            <!--Files-->
+            <Button Grid.Row="1" Grid.Column="0"  Margin="6" VerticalAlignment="Top"
                 Command="{Binding AddFileCommand}" ToolTip="Add a GMS to copy in final folder">
-            <StackPanel Orientation="Horizontal">
-                <Image Source="/Images/Add.png" Width="20"/>
-                <Label Content="Add GMS Files"/>
-            </StackPanel>
-        </Button>
+                <StackPanel Orientation="Horizontal">
+                    <Image Source="/Images/Add.png" Width="20"/>
+                    <Label Content="Add GMS Files"/>
+                </StackPanel>
+            </Button>
 
-        <ListView Grid.Row="1" Grid.Column="1" Margin="6" ItemsSource="{Binding GmsPaths}"
+            <ListView Grid.Row="1" Grid.Column="1" Margin="6" ItemsSource="{Binding GmsPaths}"
                   SelectionMode="Single" SelectedItem="{Binding CurrentGMS}">
-            <!--<ListView.ItemContainerStyle>
+                <!--<ListView.ItemContainerStyle>
                 <Style TargetType="ListViewItem">
                     <EventSetter Event="MouseLeftButtonUp" 
                                  Handler="{Binding CurrentGMSCommand,RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Window}}"/>
                 </Style>
             </ListView.ItemContainerStyle>-->
-            <ListView.View>
-                <GridView>
-                    <!--<GridViewColumn  Width="28" >
+                <ListView.View>
+                    <GridView>
+                        <!--<GridViewColumn  Width="28" >
                         <GridViewColumn.CellTemplate>
                             <DataTemplate>
                                 <Image Source="/Images/checked.png" Width="16"
@@ -61,221 +70,222 @@
                             </DataTemplate>
                         </GridViewColumn.CellTemplate>
                     </GridViewColumn>-->
-                    <GridViewColumn Header="Files" DisplayMemberBinding="{Binding}"/>
-                    <GridViewColumn    Width="{Binding DataContext.Attached,RelativeSource={RelativeSource AncestorType=Window,Mode=FindAncestor},Converter={StaticResource InvertedBoolToWidthConverter}}" Header="Link">
+                        <GridViewColumn Header="Files" DisplayMemberBinding="{Binding}"/>
+                        <GridViewColumn    Width="{Binding DataContext.Attached,RelativeSource={RelativeSource AncestorType=Window,Mode=FindAncestor},Converter={StaticResource InvertedBoolToWidthConverter}}" Header="Link">
 
-                        <GridViewColumn.CellTemplate>
+                            <GridViewColumn.CellTemplate>
 
-                            <DataTemplate>
-                                <Button Background="{x:Null}" BorderBrush="{x:Null}" Width="28" Height="28"
+                                <DataTemplate>
+                                    <Button Background="{x:Null}" BorderBrush="{x:Null}" Width="28" Height="28"
                                      CommandParameter="{Binding}" Command="{Binding DataContext.LinkCommand,RelativeSource={RelativeSource AncestorType=Window,Mode=FindAncestor}}"   >
-                                    <Image Source="/Images/link.png" />
-                                    <Button.ToolTip>Link this file to selected commands command list</Button.ToolTip>
-                                </Button>
-                            </DataTemplate>
-                        </GridViewColumn.CellTemplate>
-                    </GridViewColumn>
-                    <GridViewColumn   Width="{Binding DataContext.Attached,RelativeSource={RelativeSource AncestorType=Window,Mode=FindAncestor},Converter={StaticResource BoolToWidthConverter}}" Header="Set">
+                                        <Image Source="/Images/link.png" />
+                                        <Button.ToolTip>Link this file to selected commands command list</Button.ToolTip>
+                                    </Button>
+                                </DataTemplate>
+                            </GridViewColumn.CellTemplate>
+                        </GridViewColumn>
+                        <GridViewColumn   Width="{Binding DataContext.Attached,RelativeSource={RelativeSource AncestorType=Window,Mode=FindAncestor},Converter={StaticResource BoolToWidthConverter}}" Header="Set">
 
-                        <GridViewColumn.CellTemplate>
+                            <GridViewColumn.CellTemplate>
 
-                            <DataTemplate>
-                                <Button Background="{x:Null}" BorderBrush="{x:Null}" Width="28" Height="28"
+                                <DataTemplate>
+                                    <Button Background="{x:Null}" BorderBrush="{x:Null}" Width="28" Height="28"
                                      CommandParameter="{Binding}" Command="{Binding DataContext.SetCommand,RelativeSource={RelativeSource AncestorType=Window,Mode=FindAncestor}}"   >
-                                    <Image Source="/Images/CheckAdd.png" />
-                                    <Button.ToolTip>Set the list of macros in this file to selected commands command list</Button.ToolTip>
-                                </Button>
-                            </DataTemplate>
-                        </GridViewColumn.CellTemplate>
-                    </GridViewColumn>
-                    <GridViewColumn   Width="46" Header="Remove">
-                        <GridViewColumn.CellTemplate>
-                            <DataTemplate>
-                                <Button Background="{x:Null}" BorderBrush="{x:Null}" Width="28" Height="28"
+                                        <Image Source="/Images/CheckAdd.png" />
+                                        <Button.ToolTip>Set the list of macros in this file to selected commands command list</Button.ToolTip>
+                                    </Button>
+                                </DataTemplate>
+                            </GridViewColumn.CellTemplate>
+                        </GridViewColumn>
+                        <GridViewColumn   Width="46" Header="Remove">
+                            <GridViewColumn.CellTemplate>
+                                <DataTemplate>
+                                    <Button Background="{x:Null}" BorderBrush="{x:Null}" Width="28" Height="28"
                                      CommandParameter="{Binding}" Command="{Binding DataContext.RemoveFileCommand,RelativeSource={RelativeSource AncestorType=Window,Mode=FindAncestor}}"   >
-                                    <Image Source="/Images/trash.png" />
-                                </Button>
-                            </DataTemplate>
-                        </GridViewColumn.CellTemplate>
-                    </GridViewColumn>
+                                        <Image Source="/Images/trash.png" />
+                                    </Button>
+                                </DataTemplate>
+                            </GridViewColumn.CellTemplate>
+                        </GridViewColumn>
 
-                </GridView>
-            </ListView.View>
+                    </GridView>
+                </ListView.View>
 
-        </ListView>
-        <!--Items-->
-        <StackPanel Grid.Row="2" Grid.Column="0">
-            <Button   Margin="6" VerticalAlignment="Top"
+            </ListView>
+            <!--Items-->
+            <StackPanel Grid.Row="2" Grid.Column="0">
+                <Button   Margin="6" VerticalAlignment="Top"
                 Command="{Binding AddCommandItemCommand}">
 
+                    <StackPanel Orientation="Horizontal">
+                        <Image Source="/Images/Add.png" Width="20"/>
+                        <Label Content="Add Command"/>
+                    </StackPanel>
+
+
+                </Button>
                 <StackPanel Orientation="Horizontal">
-                    <Image Source="/Images/Add.png" Width="20"/>
-                    <Label Content="Add Command"/>
+                    <Label Content="Left:" Width="85"/>
+                    <Label Content="{Binding CommandLeft,FallbackValue=100}" HorizontalAlignment="Right"/>
                 </StackPanel>
-
-
-            </Button>
-            <StackPanel Orientation="Horizontal">
-                <Label Content="Left:" Width="85"/>
-                <Label Content="{Binding CommandLeft,FallbackValue=100}" HorizontalAlignment="Right"/>
             </StackPanel>
-        </StackPanel>
-        <ListView Grid.Row="2" Grid.Column="1" Margin="6" ItemsSource="{Binding CommandItems}"
+            <ListView Grid.Row="2" Grid.Column="1" Margin="6" ItemsSource="{Binding CommandItems}"
                   SelectionMode="Extended" >
-            <ListView.ItemContainerStyle>
-                <Style TargetType="ListViewItem">
-                    <Setter Property="IsSelected" Value="{Binding Selected}"/>
-                </Style>
-            </ListView.ItemContainerStyle>
-            <ListView.View>
-                <GridView>
-                    <GridViewColumn  Width="28" >
-                        <GridViewColumn.CellTemplate>
-                            <DataTemplate>
-                                <Image Source="/Images/checked.png" Width="16" ToolTip="Selected"
+                <ListView.ItemContainerStyle>
+                    <Style TargetType="ListViewItem">
+                        <Setter Property="IsSelected" Value="{Binding Selected}"/>
+                    </Style>
+                </ListView.ItemContainerStyle>
+                <ListView.View>
+                    <GridView>
+                        <GridViewColumn  Width="28" >
+                            <GridViewColumn.CellTemplate>
+                                <DataTemplate>
+                                    <Image Source="/Images/checked.png" Width="16" ToolTip="Selected"
                                        Visibility="{Binding Selected,Converter={StaticResource BoolToVisibilityConverter}}"/>
-                            </DataTemplate>
-                        </GridViewColumn.CellTemplate>
-                    </GridViewColumn>
-                    <GridViewColumn Header="Caption" Width="140" >
-                        <GridViewColumn.CellTemplate>
-                            <DataTemplate>
-                                <TextBox Text="{Binding Caption}" Width="120" Margin="2,0" Height="24" VerticalContentAlignment="Center"/>
-                            </DataTemplate>
-                        </GridViewColumn.CellTemplate>
-                    </GridViewColumn>
-                    <GridViewColumn Header="Command" Width="140">
-                        <GridViewColumn.CellTemplate>
-                            <DataTemplate>
-                                <!--<TextBox Text="{Binding Command}" Width="120"  Margin="2"/>-->
-                                <ComboBox ItemsSource="{Binding Commands}" Text="{Binding Command}" IsEditable="True" Width="120" Margin="2"/>
+                                </DataTemplate>
+                            </GridViewColumn.CellTemplate>
+                        </GridViewColumn>
+                        <GridViewColumn Header="Caption" Width="140" >
+                            <GridViewColumn.CellTemplate>
+                                <DataTemplate>
+                                    <TextBox Text="{Binding Caption}" Width="120" Margin="2,0" Height="24" VerticalContentAlignment="Center"/>
+                                </DataTemplate>
+                            </GridViewColumn.CellTemplate>
+                        </GridViewColumn>
+                        <GridViewColumn Header="Command" Width="140">
+                            <GridViewColumn.CellTemplate>
+                                <DataTemplate>
+                                    <!--<TextBox Text="{Binding Command}" Width="120"  Margin="2"/>-->
+                                    <ComboBox ItemsSource="{Binding Commands}" Text="{Binding Command}" IsEditable="True" Width="120" Margin="2"/>
 
-                            </DataTemplate>
-                        </GridViewColumn.CellTemplate>
-                    </GridViewColumn>
-                    <GridViewColumn Header="Enable" Width="140"  >
-                        <GridViewColumn.CellTemplate>
-                            <DataTemplate>
-                                <!--<TextBox Text="{Binding EnableCondition}" Width="120" Margin="2"/>-->
-                                <ComboBox ItemsSource="{Binding EnableConditions}" SelectedItem="{Binding EnableCondition}" IsEditable="True" Width="120" Margin="2"/>
-                            </DataTemplate>
-                        </GridViewColumn.CellTemplate>
-                    </GridViewColumn>
-                    <GridViewColumn Header="Shortcut" Width="Auto"  >
-                        <GridViewColumn.CellTemplate>
-                            <DataTemplate>
-                                <custom:ShortcutTextBox Text="{Binding ShortcutText}" Margin="2,0" Width="120" Height="24" VerticalContentAlignment="Center" />
-                                <!--<StackPanel Orientation="Horizontal">
+                                </DataTemplate>
+                            </GridViewColumn.CellTemplate>
+                        </GridViewColumn>
+                        <GridViewColumn Header="Enable" Width="140"  >
+                            <GridViewColumn.CellTemplate>
+                                <DataTemplate>
+                                    <!--<TextBox Text="{Binding EnableCondition}" Width="120" Margin="2"/>-->
+                                    <ComboBox ItemsSource="{Binding EnableConditions}" SelectedItem="{Binding EnableCondition}" IsEditable="True" Width="120" Margin="2"/>
+                                </DataTemplate>
+                            </GridViewColumn.CellTemplate>
+                        </GridViewColumn>
+                        <GridViewColumn Header="Shortcut" Width="Auto"  >
+                            <GridViewColumn.CellTemplate>
+                                <DataTemplate>
+                                    <custom:ShortcutTextBox Text="{Binding ShortcutText}" Margin="2,0" Width="120" Height="24" VerticalContentAlignment="Center" />
+                                    <!--<StackPanel Orientation="Horizontal">
                                     <CheckBox Content="Ctrl" IsChecked="{Binding Shortcut.Control}" VerticalAlignment="Center" Margin="2"/>
                                     <CheckBox Content="Shift"  IsChecked="{Binding Shortcut.Shift}" VerticalAlignment="Center" Margin="2"/>
                                     <CheckBox Content="Alt"  IsChecked="{Binding Shortcut.Alt}" VerticalAlignment="Center" Margin="2"/>
                                     <TextBox Text="{Binding Shortcut.Key}"  Width="60" Margin="2,0" Height="24" VerticalContentAlignment="Center" PreviewKeyUp="txt_PreviewKeyUP"/>
                                 </StackPanel>-->
-                            </DataTemplate>
-                        </GridViewColumn.CellTemplate>
-                    </GridViewColumn>
-                    <GridViewColumn   Width="46" Header="Icon">
-                        <GridViewColumn.CellTemplate>
-                            <DataTemplate>
-                                <Button Background="{x:Null}" BorderBrush="{x:Null}" Width="28" Height="28"
+                                </DataTemplate>
+                            </GridViewColumn.CellTemplate>
+                        </GridViewColumn>
+                        <GridViewColumn   Width="46" Header="Icon">
+                            <GridViewColumn.CellTemplate>
+                                <DataTemplate>
+                                    <Button Background="{x:Null}" BorderBrush="{x:Null}" Width="28" Height="28"
                                     CommandParameter="{Binding}" Command="{Binding DataContext.AddIconCommand,RelativeSource={RelativeSource AncestorType=Window,Mode=FindAncestor}}"   
                                     >
-                                    <Image Source="{Binding Icon}" />
-                                    <Button.ToolTip>
-                                        <Label Content="Change Command Icon" />
-                                    </Button.ToolTip>
-                                </Button>
-                            </DataTemplate>
-                        </GridViewColumn.CellTemplate>
-                    </GridViewColumn>
-                    <GridViewColumn   Width="46" Header="Remove">
-                        <GridViewColumn.CellTemplate>
-                            <DataTemplate>
-                                <Button Background="{x:Null}" BorderBrush="{x:Null}" Width="28" Height="28"
+                                        <Image Source="{Binding Icon}" />
+                                        <Button.ToolTip>
+                                            <Label Content="Change Command Icon" />
+                                        </Button.ToolTip>
+                                    </Button>
+                                </DataTemplate>
+                            </GridViewColumn.CellTemplate>
+                        </GridViewColumn>
+                        <GridViewColumn   Width="46" Header="Remove">
+                            <GridViewColumn.CellTemplate>
+                                <DataTemplate>
+                                    <Button Background="{x:Null}" BorderBrush="{x:Null}" Width="28" Height="28"
                                     CommandParameter="{Binding}" Command="{Binding DataContext.RemoveCommandItemCommand,RelativeSource={RelativeSource AncestorType=Window,Mode=FindAncestor}}"   >
 
-                                    <Image Source="/Images/trash.png" />
-                                </Button>
-                            </DataTemplate>
-                        </GridViewColumn.CellTemplate>
-                    </GridViewColumn>
-                    <GridViewColumn   Width="46" Header="">
-                        <GridViewColumn.CellTemplate>
-                            <DataTemplate>
-                                <Grid Width="28" Height="28">
-                                    <Ellipse Fill="Red" Margin="6">
-                                        <Ellipse.ToolTip>
-                                            <StackPanel>
-                                                <Label Content="Not Ready!" Foreground="Red" FontWeight="Bold"/>
-                                                <Label Content="Link a GMS file to command and fill &quot;Command&quot; text box!" />
-                                            </StackPanel>
-                                        </Ellipse.ToolTip>
-                                    </Ellipse>
-                                    <Ellipse Fill="Green" Margin="6" ToolTip="Ready!" Visibility="{Binding IsOk,Converter={StaticResource BoolToVisibilityConverter}}"/>
-                                </Grid>
-                            </DataTemplate>
-                        </GridViewColumn.CellTemplate>
-                    </GridViewColumn>
+                                        <Image Source="/Images/trash.png" />
+                                    </Button>
+                                </DataTemplate>
+                            </GridViewColumn.CellTemplate>
+                        </GridViewColumn>
+                        <GridViewColumn   Width="46" Header="">
+                            <GridViewColumn.CellTemplate>
+                                <DataTemplate>
+                                    <Grid Width="28" Height="28">
+                                        <Ellipse Fill="Red" Margin="6">
+                                            <Ellipse.ToolTip>
+                                                <StackPanel>
+                                                    <Label Content="Not Ready!" Foreground="Red" FontWeight="Bold"/>
+                                                    <Label Content="Link a GMS file to command and fill &quot;Command&quot; text box!" />
+                                                </StackPanel>
+                                            </Ellipse.ToolTip>
+                                        </Ellipse>
+                                        <Ellipse Fill="Green" Margin="6" ToolTip="Ready!" Visibility="{Binding IsOk,Converter={StaticResource BoolToVisibilityConverter}}"/>
+                                    </Grid>
+                                </DataTemplate>
+                            </GridViewColumn.CellTemplate>
+                        </GridViewColumn>
 
-                </GridView>
-            </ListView.View>
+                    </GridView>
+                </ListView.View>
 
-        </ListView>
-        <Grid Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="2">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="120"/>
-                <ColumnDefinition Width="140"/>
-                <ColumnDefinition Width="Auto"/>
-                <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="120"/>
-                
-            </Grid.ColumnDefinitions>
-            <Button CommandParameter="{Binding}" Command="{Binding GenerateCommand}"  Grid.Column="0" Grid.Row="0"   
+            </ListView>
+            <Grid Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="2">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="120"/>
+                    <ColumnDefinition Width="140"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="120"/>
+
+                </Grid.ColumnDefinitions>
+                <Button CommandParameter="{Binding}" Command="{Binding GenerateCommand}"  Grid.Column="0" Grid.Row="0"   
                     Margin="6" ToolTip="generate your command bar compose files">
-                <Button.Style>
-                    <Style TargetType="Button">
+                    <Button.Style>
+                        <Style TargetType="Button">
 
-                        <Style.Triggers>
-                            <Trigger Property="IsEnabled" Value="True">
-                                <Setter Property="Background" Value="#FF232523" />
-                            </Trigger>
-                            <Trigger Property="IsMouseOver" Value="True">
-                                <Setter Property="Background" Value="#FF211024" />
-                            </Trigger>
-                        </Style.Triggers>
-                    </Style>
-                </Button.Style>
-                <StackPanel Orientation="Horizontal">
-                    <Image Source="/Images/BuildSelection.png" Width="20"/>
-                    <Label Content="Generate" Foreground="LightGreen" FontWeight="Bold"/>
-                </StackPanel>
-            </Button>
-            <Button CommandParameter="{Binding}" Command="{Binding AttachCorelDRWCommand}" Grid.Column="1" Grid.Row="0" 
+                            <Style.Triggers>
+                                <Trigger Property="IsEnabled" Value="True">
+                                    <Setter Property="Background" Value="#FF232523" />
+                                </Trigger>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter Property="Background" Value="#FF211024" />
+                                </Trigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Button.Style>
+                    <StackPanel Orientation="Horizontal">
+                        <Image Source="/Images/BuildSelection.png" Width="20"/>
+                        <Label Content="Generate" Foreground="LightGreen" FontWeight="Bold"/>
+                    </StackPanel>
+                </Button>
+                <Button CommandParameter="{Binding}" Command="{Binding AttachCorelDRWCommand}" Grid.Column="1" Grid.Row="0" 
                     Content="{Binding AttachButtonText}"  Margin="6"/>
 
-            <StackPanel Grid.Column="2" Visibility="{Binding Attached,Converter={StaticResource BoolToVisibilityConverter}}" 
+                <StackPanel Grid.Column="2" Visibility="{Binding Attached,Converter={StaticResource BoolToVisibilityConverter}}" 
                         Orientation="Horizontal" VerticalAlignment="Center">
 
-                <Label Content="Sucess!" Foreground="#FF11A51A"/>
-                <Button Content="Send To" 
+                    <Label Content="Sucess!" Foreground="#FF11A51A"/>
+                    <Button Content="Send To" 
                         Visibility="{Binding IsAdmin,Converter={StaticResource BoolToVisibilityConverter}}" 
                         Command="{Binding SendToCommand}"
                        ToolTip="Send To Addon Folder" />
-                <Label Content="{Binding Version}"  Foreground="#FF11A51A"/>
-            </StackPanel>
-            <StackPanel Grid.Column="4" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,0,10,0"
+                    <Label Content="{Binding Version}"  Foreground="#FF11A51A"/>
+                </StackPanel>
+                <StackPanel Grid.Column="4" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,0,10,0"
                         Visibility="{Binding IsAdmin,Converter={StaticResource BoolToVisibilityConverter}}" >
-                <Button Content="Install In" CommandParameter="{Binding ElementName=cb_cdrVersions,Path=SelectedItem}"
+                    <Button Content="Install In" CommandParameter="{Binding ElementName=cb_cdrVersions,Path=SelectedItem}"
                             Command="{Binding InstallCommand}" Padding="4"/>
-                <ComboBox ItemsSource="{Binding CorelVersions}"  Name="cb_cdrVersions" Height="28">
-                    <ComboBox.ItemTemplate>
-                        <DataTemplate>
-                            <Label Content="{Binding CorelAbreviation}" />
-                        </DataTemplate>
-                    </ComboBox.ItemTemplate>
-                </ComboBox>
-            </StackPanel>
+                    <ComboBox ItemsSource="{Binding CorelVersions}"  Name="cb_cdrVersions" Height="28">
+                        <ComboBox.ItemTemplate>
+                            <DataTemplate>
+                                <Label Content="{Binding CorelAbreviation}" />
+                            </DataTemplate>
+                        </ComboBox.ItemTemplate>
+                    </ComboBox>
+                </StackPanel>
 
+            </Grid>
         </Grid>
-    </Grid>
+    </DockPanel>
 </Window>

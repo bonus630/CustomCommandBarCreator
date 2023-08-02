@@ -1,48 +1,32 @@
 ﻿using Corel.Interop.VGCore;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Runtime.InteropServices;
-using System.Threading;
-using System.Reflection;
-using System.Windows.Interop;
 using System.Text;
-using System.Windows.Controls;
 using System.Linq;
-
 namespace GMSLoader.DataSource
 {
     [ComVisible(true)]
     [ClassInterface(ClassInterfaceType.AutoDual)]
-    public class GMSLoaderDataSource : BaseDataSource
+    public class $DataSourceName$DataSource : BaseDataSource
     {
-
-    
         private List<GMSProject> projects = new List<GMSProject>();
         private string path;
-
-        public GMSLoaderDataSource(DataSourceProxy proxy) : base(proxy)
+        public $DataSourceName$DataSource(DataSourceProxy proxy) : base(proxy)
         {
             path = GetFolder();
         }
-
-
-
-
         private string GetNames(int index)
         {
             string result = string.Empty;
             using (FileStream fs = File.Open(string.Format("{0}/table.89", path), FileMode.Open, FileAccess.Read))
             {
-
                 byte[] bytes = new byte[4];
                 fs.Read(bytes, 0, 4);
                 int itemsCount = BitConverter.ToInt32(bytes, 0);
-
                 int position = 4;
                 int itemPosition = 4 * itemsCount + position;
-
                 for (int i = 0; i < index; i++)
                 {
                     fs.Position = position;
@@ -54,20 +38,16 @@ namespace GMSLoader.DataSource
                 fs.Position = position;
                 fs.Read(bytes, 0, 4);
                 int size = BitConverter.ToInt32(bytes, 0);
-
                 bytes = new byte[size];
                 fs.Position = itemPosition;
                 fs.Read(bytes, 0, size);
-
                 result = Encoding.UTF8.GetString(bytes);
-
             }
             return result;
         }
-
         private string GetFolder()
         {
-            string codeBase = typeof(GMSLoaderDataSource).Assembly.CodeBase;
+            string codeBase = typeof($DataSourceName$DataSource).Assembly.CodeBase;
             if (!string.IsNullOrEmpty(codeBase))
             {
                 codeBase = codeBase.Remove(0, 8);
@@ -75,29 +55,21 @@ namespace GMSLoader.DataSource
             }
             return Path.Combine(ControlUI.corelApp.AddonPath,codeBase);
         }
-
         private void Load(int index)
         {  
             if (!ControlUI.corelApp.InitializeVBA())
                 return;
             string[] names = GetNames(index).Split('$');
             string path = string.Format("{0}\\{1}",GetFolder(), names[0]);
-
             string module = names[1].Substring(0, names[1].IndexOf("."));
             string macro = names[1].Replace(module + ".", "");
-
-
-
             GMSProject gmp = projects.SingleOrDefault(r=>r.FileName==names[0]);
-
             if (gmp == null)
             {
                 gmp = ControlUI.corelApp.GMSManager.Projects.Load(path);
                 projects.Add(gmp);
             }
             ControlUI.corelApp.GMSManager.RunMacro(module, macro,null);
-
-
         }
         public void UnloadGMS()
         {

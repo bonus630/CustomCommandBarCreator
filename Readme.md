@@ -51,6 +51,8 @@ https://github.com/dblock/resourcelib
 
 ![PrintScreen 01](print.PNG)
 
+https://youtu.be/ItBmEawJO10
+
 ## Advantages
 
 1. Preservation of the custom bar: When restoring CorelDRAW to its factory default settings, our custom bar will not be lost. It will remain available for use even after the restoration.

@@ -1,5 +1,4 @@
 ﻿using CustomCommandBarCreator.ModelViews;
-
 using System;
 using System.IO;
 using System.IO.Compression;
@@ -15,6 +14,8 @@ namespace CustomCommandBarCreator.Models
         public string Folder { get; protected set; }
         readonly int StartIconId = 100;
         public event Action BuildDataSourceFinish;
+        public string DsName { get; protected set; }
+
 
         public bool CreateBar(CommandBar bar)
         {
@@ -36,20 +37,21 @@ namespace CustomCommandBarCreator.Models
                 result = true;
             }
             catch { }
-            
+
             return result;
         }
-        public void CreateDataSource(string folder,int version)
+        public void CreateDataSource(string folder, int version)
         {
             string projectDir = UnzipFiles();
-            CreateTargetFile(projectDir,folder);
+            CreateTargetFile(projectDir, folder);
+            ModifyProject(projectDir, folder);
             BuildDataSource(projectDir, version);
-           
         }
         private void CreateXSLT(CommandBar commandBar)
         {
             XSLTGenerator generator = new XSLTGenerator(commandBar, this.Folder);
             generator.GenerateAppUI();
+            DsName = generator.DsName;
             generator.GenerateUserUI();
         }
         public void CopyGMS(CommandBar bar)
@@ -107,8 +109,22 @@ namespace CustomCommandBarCreator.Models
             if (fbd.ShowDialog() == DialogResult.OK)
             {
                 string path = fbd.SelectedPath;
-                if (Directory.GetFiles(path).Length > 0)
+                string[] files = Directory.GetFiles(path);
+                if (files.Length > 0)
                 {
+                    if (MessageBox.Show("Clear this folder?", "Attention!", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
+                    {
+
+                        for (int i = 0; i < files.Length; i++)
+                        {
+                            try
+                            {
+                                File.Delete(files[i]);
+                            }
+                            catch { }
+                        }
+
+                    }
                     SelectFolderEmpty();
                     return false;
                 }
@@ -126,14 +142,14 @@ namespace CustomCommandBarCreator.Models
                 string path = fbd.SelectedPath;
                 DirectoryInfo di = new DirectoryInfo(path);
                 FileInfo[] fi = di.GetFiles("Coreldrw.addon");
-                if(fi.Length == 0)
+                if (fi.Length == 0)
                 {
                     MessageBox.Show("Invalid Directory!");
                     SelectBarFolder();
                 }
                 return path;
-             
-              
+
+
             }
             return string.Empty;
         }
@@ -244,27 +260,46 @@ namespace CustomCommandBarCreator.Models
             return projectDir;
 
         }
+        private void ModifyProject(string projectDir, string folder)
+        {
+            //$DataSourceName$
+            string path = string.Format("{0}\\ControlUI.xaml.cs", projectDir);
+            var lines = File.ReadAllLines(path);
+            if (string.IsNullOrEmpty(DsName))
+                DsName = XSLTGenerator.GetDataSourceName(string.Format("{0}\\AppUI.xslt", folder));
+            lines[8] = lines[8].Replace("$DataSourceName$", DsName);
+            lines[16] = lines[16].Replace("$DataSourceName$", DsName);
+            File.WriteAllLines(path, lines);
 
-        private void CreateTargetFile(string projectDir,string barFolder)
+            path = string.Format("{0}\\DataSource\\GMSLoaderDataSource.cs", projectDir);
+            var lines2 = File.ReadAllLines(path);
+            lines2[11] = lines2[11].Replace("$DataSourceName$", DsName);
+            lines2[15] = lines2[15].Replace("$DataSourceName$", DsName);
+            lines2[49] = lines2[49].Replace("$DataSourceName$", DsName);
+            File.WriteAllLines(path, lines2);
+
+
+
+
+        }
+        private void CreateTargetFile(string projectDir, string barFolder)
         {
             TargetsCreator tc = new TargetsCreator();
-            tc.WriteTargetsFile(projectDir,barFolder);
+            tc.WriteTargetsFile(projectDir, barFolder);
         }
-        private void BuildDataSource(string projectDir,int corelVersion)
+        private void BuildDataSource(string projectDir, int corelVersion)
         {
             Builder builder = new Builder();
-            builder.ProjectPath = string.Format("{0}\\GMSLoader.csproj",projectDir);
+            builder.ProjectPath = string.Format("{0}\\GMSLoader.csproj", projectDir);
             builder.CorelVersion = corelVersion;
-           
+
             builder.Finish += (b) =>
             {
                 if (b)
                 {
                     BuildDataSourceFinish?.Invoke();
-                   
-
                 }
-            }; 
+            };
             builder.Run();
         }
 

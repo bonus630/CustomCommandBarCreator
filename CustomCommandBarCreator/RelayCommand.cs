@@ -3,6 +3,7 @@ using System.Windows.Input;
 
 namespace CustomCommandBarCreator
 {
+    
     public class RelayCommand<T> : ICommand
     {
         public event EventHandler CanExecuteChanged;

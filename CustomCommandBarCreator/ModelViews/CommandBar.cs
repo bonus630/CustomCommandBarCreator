@@ -8,14 +8,15 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using System.Security.Principal;
 using System.Threading;
-using System.Windows.Threading;
+
 
 namespace CustomCommandBarCreator.ModelViews
 {
+    [Serializable]
     public class CommandBar : ControlItem
     {
         // private bool canGenerate = false;
-
+        
         private ObservableCollection<string> gmsPaths;
 
         public ObservableCollection<string> GmsPaths
@@ -51,7 +52,7 @@ namespace CustomCommandBarCreator.ModelViews
                 GenerateCommand.RaiseCanExecuteChanged();
             }
         }
-
+        [NonSerialized]
         private string currentGMS;
 
         public string CurrentGMS
@@ -64,7 +65,7 @@ namespace CustomCommandBarCreator.ModelViews
                 OnPropertyChanged();
             }
         }
-
+        [NonSerialized]
         private bool attached;
 
         public bool Attached
@@ -72,7 +73,7 @@ namespace CustomCommandBarCreator.ModelViews
             get { return attached; }
             set { attached = value; OnPropertyChanged(); }
         }
-
+        [NonSerialized]
         private bool isAdmin;
 
         public bool IsAdmin
@@ -80,7 +81,7 @@ namespace CustomCommandBarCreator.ModelViews
             get { return isAdmin; }
             set { isAdmin = value; OnPropertyChanged(); }
         }
-
+        [NonSerialized]
         private string version;
 
         public string Version
@@ -88,7 +89,7 @@ namespace CustomCommandBarCreator.ModelViews
             get { return version; }
             set { version = value; OnPropertyChanged(); }
         }
-
+        [NonSerialized]
         private string attachButtonText = "Attach in a CorelDRW";
 
         public string AttachButtonText
@@ -100,6 +101,7 @@ namespace CustomCommandBarCreator.ModelViews
                 OnPropertyChanged();
             }
         }
+        [NonSerialized]
         private int commandLeft = 100;
 
         public int CommandLeft
@@ -107,11 +109,11 @@ namespace CustomCommandBarCreator.ModelViews
             get { return commandLeft; }
             set { commandLeft = value; OnPropertyChanged(); }
         }
-
+       
         public ObservableCollection<CorelVersionInfo> CorelVersions { get; set; }
-
-
         public RelayCommand<CommandBar> GenerateCommand { get; set; }
+        public RelayCommand<CommandBar> SaveBarCommand { get; set; }
+        public RelayCommand<CommandBar> LoadBarCommand { get; set; }
         public RelayCommand<string> AddFileCommand { get; set; }
         public RelayCommand<CommandItem> AddCommandItemCommand { get; set; }
         public RelayCommand<string> RemoveFileCommand { get; set; }
@@ -129,6 +131,9 @@ namespace CustomCommandBarCreator.ModelViews
         {
 
             GenerateCommand = new RelayCommand<CommandBar>(GenereteBar, CanGenereteBar);
+            SaveBarCommand = new RelayCommand<CommandBar>(SaveBar);
+            LoadBarCommand = new RelayCommand<CommandBar>(LoadBar);
+
             AddFileCommand = new RelayCommand<string>(AddFile);
             AddCommandItemCommand = new RelayCommand<CommandItem>(AddCommandItem, CanAddCommandItem);
             RemoveFileCommand = new RelayCommand<string>(RemoveFile);
@@ -203,7 +208,9 @@ namespace CustomCommandBarCreator.ModelViews
             }
             GenerateCommand.RaiseCanExecuteChanged();
         }
+        [NonSerialized]
         object app = null;
+        [NonSerialized]
         private int cdrVersion;
         private void AttachCorelDRW(object obj)
         {
@@ -290,13 +297,19 @@ namespace CustomCommandBarCreator.ModelViews
             }
             for (int i = 0; i < files.Length; i++)
             {
-                if (File.Exists(files[i]) && !this.gmsPaths.Contains(files[i]))
-                    this.GmsPaths.Add(files[i]);
+                CheckAndAddGmsFile(files[i]);
             }
         }
-        private void AddCommandItem(CommandItem item)
+        public void CheckAndAddGmsFile(string path)
         {
-            this.CommandItems.Add(new CommandItem());
+            if (File.Exists(path) && !this.gmsPaths.Contains(path))
+                this.GmsPaths.Add(path);
+        }
+        public void AddCommandItem(CommandItem item)
+        {
+            if (item == null)
+                item = new CommandItem();
+            this.CommandItems.Add(item);
             this.CommandLeft--;
             AddCommandItemCommand.RaiseCanExecuteChanged();
             GenerateCommand.RaiseCanExecuteChanged();
@@ -354,25 +367,45 @@ namespace CustomCommandBarCreator.ModelViews
             {
 
                 resultFolder = generator.Folder;
-                generator.CreateDataSource(resultFolder, cdrVersion);
+                if(cdrVersion >= CorelVersionInfo.MinVersion)
+                    generator.CreateDataSource(resultFolder, cdrVersion);
+                else
+                {
+                    System.Windows.MessageBox.Show("DataSource is not created, please use install button in administrator level and select your bar folder to makes a correct installation","Attention!"
+                        ,System.Windows.MessageBoxButton.OK,System.Windows.MessageBoxImage.Warning);
+                }
             }
             else
                 resultFolder = string.Empty;
         }
-        public void AddCommandItem(CommandItem command, string gmsPath)
+        private void SaveBar(CommandBar bar)
         {
-            if (!GmsPaths.Contains(gmsPath))
-                GmsPaths.Add(gmsPath);
-            CommandItems.Add(command);
+            SaveFileDialog saveFileDialog = new SaveFileDialog();
+            saveFileDialog.Filter = "Bar File (*.bar)|*.bar";
+            saveFileDialog.DefaultExt = ".bar";
+            saveFileDialog.Title = "Save your Bar Project";
+            if ((bool)saveFileDialog.ShowDialog())
+            {
+                string path = saveFileDialog.FileName;
+                Serializer.Serialize(bar, path);
+            }
+        }
+        private void LoadBar(CommandBar bar)
+        {
+            string[] path = GetFilePath(FileType.BAR);
+            if (path == null)
+                return;
+            Serializer.DeSerialize(this, path[0]);
 
         }
-
+    
         public CommandItem this[int index]
         {
             get { return commandItems[index]; }
             set { commandItems[index] = value; }
         }
 
+ 
         public int Count { get => commandItems.Count; }
         public bool HaveShortcut { get; protected set; }
 
@@ -401,6 +434,11 @@ namespace CustomCommandBarCreator.ModelViews
                     }
                     catch { }
                     multiselect = true;
+                    break;
+                case FileType.BAR:
+                    filter = "Bar File (*.bar)|*.bar";
+                    title = "Select a .bar file!";
+                    multiselect = false;
                     break;
             }
             ofd.Filter = filter;
@@ -462,6 +500,7 @@ namespace CustomCommandBarCreator.ModelViews
 
             }
         }
+        [NonSerialized]
         private bool canInstall = true;
         private bool CanInstall(CorelVersionInfo version)
         {
@@ -486,7 +525,8 @@ namespace CustomCommandBarCreator.ModelViews
     enum FileType
     {
         ICON,
-        GMS
+        GMS,
+        BAR
     }
 
 }

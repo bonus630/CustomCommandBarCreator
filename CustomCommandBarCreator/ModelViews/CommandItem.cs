@@ -6,6 +6,7 @@ using System.Windows.Media;
 
 namespace CustomCommandBarCreator.ModelViews
 {
+    [Serializable]
     public class CommandItem : ControlItem
     {
         private string caption;
@@ -19,6 +20,7 @@ namespace CustomCommandBarCreator.ModelViews
                 OnPropertyChanged();
             }
         }
+        [NonSerialized]
         private bool selected;
 
         public bool Selected
@@ -40,6 +42,7 @@ namespace CustomCommandBarCreator.ModelViews
                 OnPropertyChanged();
             }
         }
+        [NonSerialized]
         private ObservableCollection<string> commands = new ObservableCollection<string>() { ""};
 
         public ObservableCollection<string> Commands
@@ -63,6 +66,7 @@ namespace CustomCommandBarCreator.ModelViews
                 OnPropertyChanged();
             }
         }
+        [NonSerialized]
         private ObservableCollection<string> enableConditions =
             new ObservableCollection<string>(){
                 "true",
@@ -81,7 +85,7 @@ namespace CustomCommandBarCreator.ModelViews
                 OnPropertyChanged();
             }
         }
-
+        [NonSerialized]
         private ImageSource icon;
 
         public ImageSource Icon
@@ -123,7 +127,7 @@ namespace CustomCommandBarCreator.ModelViews
                
             }
         }
-
+        [NonSerialized]
         private string shortcutText;
 
         public string ShortcutText
@@ -149,7 +153,7 @@ namespace CustomCommandBarCreator.ModelViews
                 OnPropertyChanged();
             }
         }
-
+        [NonSerialized]
         private bool isOk = false;
 
         public bool IsOk
