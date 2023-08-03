@@ -5,7 +5,7 @@ using System.IO;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Linq;
-namespace GMSLoader.DataSource
+namespace $DataSourceName$.DataSource
 {
     [ComVisible(true)]
     [ClassInterface(ClassInterfaceType.AutoDual)]
@@ -70,6 +70,7 @@ namespace GMSLoader.DataSource
                 projects.Add(gmp);
             }
             ControlUI.corelApp.GMSManager.RunMacro(module, macro,null);
+            
         }
         public void UnloadGMS()
         {

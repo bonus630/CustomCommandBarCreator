@@ -13,8 +13,8 @@
     <TemplateGuid>{3c372ba8-3752-489f-87f2-df27aa4850c8}</TemplateGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>GMSLoader</RootNamespace>
-    <AssemblyName>GMSLoader</AssemblyName>
+    <RootNamespace>$DataSourceName$</RootNamespace>
+    <AssemblyName>$DataSourceName$</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>
@@ -203,7 +203,7 @@
       <SubType>Code</SubType>
     </Compile>
 
-    <Compile Include="DataSource\GMSLoaderDataSource.cs">
+    <Compile Include="DataSource\$DataSourceName$DataSource.cs">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="DataSource\BaseDataSource.cs">

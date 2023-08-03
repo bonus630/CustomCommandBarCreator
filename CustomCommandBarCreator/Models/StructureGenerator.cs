@@ -4,6 +4,7 @@ using System.IO;
 using System.IO.Compression;
 using System.Linq;
 using System.Text;
+using System.Windows.Controls;
 using System.Windows.Forms;
 using Vestris.ResourceLib;
 
@@ -43,8 +44,9 @@ namespace CustomCommandBarCreator.Models
         public void CreateDataSource(string folder, int version)
         {
             string projectDir = UnzipFiles();
-            CreateTargetFile(projectDir, folder);
-            ModifyProject(projectDir, folder);
+           
+            ModifyProject(projectDir, folder); 
+            CreateTargetFile(projectDir, folder,DsName);
             BuildDataSource(projectDir, version);
         }
         private void CreateXSLT(CommandBar commandBar)
@@ -119,17 +121,24 @@ namespace CustomCommandBarCreator.Models
                         {
                             try
                             {
-                                File.Delete(files[i]);
+                                File.Delete(files[i]); 
+                              
                             }
                             catch { }
                         }
 
                     }
-                    SelectFolderEmpty();
+                   
                     return false;
                 }
-                Folder = fbd.SelectedPath;
-                return true;
+                if(Directory.GetFiles(path).Length > 0)
+                    return false;
+                else
+                {
+                    Folder = fbd.SelectedPath;
+                    return true;
+                }
+               
             }
             return false;
         }
@@ -226,8 +235,9 @@ namespace CustomCommandBarCreator.Models
 
             string extractFolder = Path.GetTempPath();
             string projectDir = Path.Combine(Path.GetTempPath(), "GMSLoader");
-            if (!Directory.Exists(projectDir))
-                Directory.CreateDirectory(projectDir);
+            if (Directory.Exists(projectDir))
+                Directory.Delete(projectDir, true);
+            Directory.CreateDirectory(projectDir);
 
             string zip = string.Format("{0}GMSLoader.zip", extractFolder);
             File.WriteAllBytes(zip, Properties.Resources.GMSLoader);
@@ -263,29 +273,38 @@ namespace CustomCommandBarCreator.Models
         private void ModifyProject(string projectDir, string folder)
         {
             //$DataSourceName$
-            string path = string.Format("{0}\\ControlUI.xaml.cs", projectDir);
-            var lines = File.ReadAllLines(path);
             if (string.IsNullOrEmpty(DsName))
                 DsName = XSLTGenerator.GetDataSourceName(string.Format("{0}\\AppUI.xslt", folder));
-            lines[8] = lines[8].Replace("$DataSourceName$", DsName);
-            lines[16] = lines[16].Replace("$DataSourceName$", DsName);
-            File.WriteAllLines(path, lines);
 
-            path = string.Format("{0}\\DataSource\\GMSLoaderDataSource.cs", projectDir);
-            var lines2 = File.ReadAllLines(path);
-            lines2[11] = lines2[11].Replace("$DataSourceName$", DsName);
-            lines2[15] = lines2[15].Replace("$DataSourceName$", DsName);
-            lines2[49] = lines2[49].Replace("$DataSourceName$", DsName);
-            File.WriteAllLines(path, lines2);
+            string[] files = { "GMSLoader.csproj", "ControlUI.xaml.cs", "ControlUI.xaml", "Properties\\AssemblyInfo.cs"
+            ,"DataSource\\BaseDataSource.cs","DataSource\\DataSourceFactory.cs","DataSource\\GMSLoaderDataSource.cs"};
+            int[][] ids = { new int[] { 15, 16, 205 }, new int[] { 3, 8, 17 }, new int[] { 0, 5 }, new int[] { 7, 11 }
+            , new int[] { 10 }, new int[] { 6 }, new int[] { 7, 11,15,49 }};
 
-
+            for (int i = 0; i < files.Length; i++)
+            {
+                UpdateFiles(projectDir, files[i], ids[i]);
+            }
+          
+            if(!File.Exists(string.Format("{0}\\DataSource\\{1}DataSource.cs", projectDir, DsName)))
+                File.Copy(string.Format("{0}\\DataSource\\GMSLoaderDataSource.cs", projectDir),string.Format("{0}\\DataSource\\{1}DataSource.cs",projectDir,DsName));  
 
 
         }
-        private void CreateTargetFile(string projectDir, string barFolder)
+        private void UpdateFiles(string projectDir,string path, int[] lineId)
+        {
+            path = string.Format("{0}\\{1}", projectDir,path);
+            var lines = File.ReadAllLines(path);
+            for (int i = 0; i < lineId.Length; i++)
+            {
+                lines[lineId[i]] = lines[lineId[i]].Replace("$DataSourceName$", DsName);
+            }
+            File.WriteAllLines(path, lines);
+        }
+        private void CreateTargetFile(string projectDir, string barFolder, string dsName)
         {
             TargetsCreator tc = new TargetsCreator();
-            tc.WriteTargetsFile(projectDir, barFolder);
+            tc.WriteTargetsFile(projectDir, barFolder,dsName);
         }
         private void BuildDataSource(string projectDir, int corelVersion)
         {

@@ -70,7 +70,7 @@ namespace CustomCommandBarCreator
             psi.Start();
             //psi.BeginOutputReadLine();
            // psi.BeginErrorReadLine();
-            //psi.WaitForExit();
+            psi.WaitForExit();
             //psi.CancelOutputRead();
             //psi.CancelErrorRead();
 

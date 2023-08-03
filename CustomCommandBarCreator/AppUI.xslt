@@ -16,7 +16,7 @@
 		<!--Creates a item to add a Warpper, responsible to initialize the DataSource to be consumimed in menu item above -->
       <itemData guid="$GuidB$"
                 type="wpfhost"
-                hostedType="Addons\$Folder$\GMSLoader.CorelAddon,GMSLoader.ControlUI"
+                hostedType="Addons\$Folder$\$DataSourceName$.CorelAddon,$DataSourceName$.ControlUI"
                 enable="true"/>
 	$itemsApp$
 			</xsl:copy>

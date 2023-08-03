@@ -1,7 +1,7 @@
 ﻿using System.Windows;
 using System.Windows.Controls;
 using corel = Corel.Interop.VGCore;
-namespace GMSLoader
+namespace $DataSourceName$
 {
     public partial class ControlUI : UserControl
     {
@@ -11,6 +11,7 @@ namespace GMSLoader
         {
             try
             {
+                //System.Windows.MessageBox.Show("Test");
                 corelApp = app as corel.Application;
                 this.Unloaded += ControlUI_Unloaded;
                 var dsf = new DataSource.DataSourceFactory();

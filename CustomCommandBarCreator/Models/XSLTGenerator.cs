@@ -8,7 +8,7 @@ namespace CustomCommandBarCreator.Models
 {
     public class XSLTGenerator
     {
-        private readonly string[] Flags = new string[] { "$itemsUser$", "$itemsApp$", "$GuidA$", "$Caption$", "$itemsRef$", "$Shortcuts$","$GuidB$","$Folder$" };
+        private readonly string[] Flags = new string[] { "$itemsUser$", "$itemsApp$", "$GuidA$", "$Caption$", "$itemsRef$", "$Shortcuts$","$GuidB$","$Folder$", "$DataSourceName$" };
 
         string itemsUser = "", itemsApp = "", GuidA = "", Caption = "", itemsRef = "", Shortcuts = "",GuidB ="",Folder="";
 
@@ -58,6 +58,7 @@ namespace CustomCommandBarCreator.Models
             appui = appui.Replace(Flags[3], Caption);
             appui = appui.Replace(Flags[4], itemsRef);
             appui = appui.Replace(Flags[5], Shortcuts);
+            appui = appui.Replace(Flags[8], DsName);
 
             File.WriteAllText(path, appui);
         }
@@ -97,7 +98,7 @@ namespace CustomCommandBarCreator.Models
                 sb.Append(commandBar[i].Guid);
                 sb.Append("\" onInvoke = \"*Bind(DataSource=");
                 sb.Append(DsName);
-                sb.Append("; Path=LoadGMS");
+                sb.Append(";Path=LoadGMS");
                 sb.Append(i.ToString("000"));
                 sb.Append(")\" type = \"button\" userCaption=\"");
                 sb.Append(commandBar[i].Caption);
@@ -192,7 +193,7 @@ namespace CustomCommandBarCreator.Models
         public static string GetDataSourceName(string appUiPath)
         {
             string text = File.ReadAllText(appUiPath);
-            Regex rg = new Regex("Bind(DataSource=?<dataSourceName>(GMS([A-H0-9]{6})DS);Path=LoadGMS", RegexOptions.Compiled);
+            Regex rg = new Regex(@"Bind\(DataSource=(?<dataSourceName>GMS([A-H0-9]{6})DS);", RegexOptions.Compiled);
             Match match = rg.Match(text);
 
             string dsName = match.Result("${dataSourceName}");

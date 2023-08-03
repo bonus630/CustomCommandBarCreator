@@ -119,8 +119,11 @@ namespace CustomCommandBarCreator
                 ci.EnableCondition = node.ChildNodes[3].InnerText;
                 int gmsid = -1;
                 Int32.TryParse(node.ChildNodes[0].InnerText, out gmsid);
-                if (gmsid > -1)
-                    ci.GmsPath = gmsNode.SelectSingleNode($"//Gms[@id='{gmsid}']").InnerText;
+                if (gmsid > -1) {
+                    string gmsPath = gmsNode.SelectSingleNode($"//Gms[@id='{gmsid}']").InnerText;
+                    gmsPath = gmsPath.Substring(gmsPath.LastIndexOf("\\") + 1).Split('.')[0];
+                    ci.GmsPath = gmsPath;
+                }
                 ci.ShortcutText = node.ChildNodes[4].InnerText;
                 ci.Selected = false;
 
