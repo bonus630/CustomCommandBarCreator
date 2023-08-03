@@ -166,5 +166,11 @@
   <ItemGroup>
     <Resource Include="Images\link.png" />
   </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\NewDocument.png" />
+    <Resource Include="Images\OpenFile.png" />
+    <Resource Include="Images\Save.png" />
+    <Resource Include="Images\SaveAs.png" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

@@ -11,78 +11,83 @@ namespace CustomCommandBarCreator
 {
     public  class Serializer
     {
-        public static void Serialize(CommandBar bar,string path)
+        public static bool Serialize(CommandBar bar, string  path)
         {
-         
-            XmlDocument doc = new XmlDocument();
-            doc.AppendChild(doc.CreateNode(XmlNodeType.XmlDeclaration, "", ""));
-            XmlNode mainNode = doc.CreateNode(XmlNodeType.Element, "CommandBar", "");
-
-            XmlAttribute attribute = doc.CreateAttribute("version");
-            attribute.Value = "2.0";
-
-            mainNode.Attributes.Append(attribute);
-
-            attribute = doc.CreateAttribute("name");
-            attribute.Value = bar.Name;
-            mainNode.Attributes.Append(attribute);
-
-            XmlNode node = doc.CreateNode(XmlNodeType.Element, "GmsFiles", "");
-            mainNode.AppendChild(node);
-            for (int i = 0; i < bar.GmsPaths.Count; i++)
+            
+            try
             {
-                XmlNode n = doc.CreateNode(XmlNodeType.Element, "Gms", "");
-                attribute = doc.CreateAttribute("id");
-                attribute.Value = i.ToString();
-                n.Attributes.Append(attribute);
-                var p = doc.CreateTextNode(bar.GmsPaths[i]);
-                n.AppendChild(p);
-                node.AppendChild(n);
+                XmlDocument doc = new XmlDocument();
+                doc.AppendChild(doc.CreateNode(XmlNodeType.XmlDeclaration, "", ""));
+                XmlNode mainNode = doc.CreateNode(XmlNodeType.Element, "CommandBar", "");
+
+                XmlAttribute attribute = doc.CreateAttribute("version");
+                attribute.Value = "2.0";
+
+                mainNode.Attributes.Append(attribute);
+
+                attribute = doc.CreateAttribute("name");
+                attribute.Value = bar.Name;
+                mainNode.Attributes.Append(attribute);
+
+                XmlNode node = doc.CreateNode(XmlNodeType.Element, "GmsFiles", "");
+                mainNode.AppendChild(node);
+                for (int i = 0; i < bar.GmsPaths.Count; i++)
+                {
+                    XmlNode n = doc.CreateNode(XmlNodeType.Element, "Gms", "");
+                    attribute = doc.CreateAttribute("id");
+                    attribute.Value = i.ToString();
+                    n.Attributes.Append(attribute);
+                    var p = doc.CreateTextNode(bar.GmsPaths[i]);
+                    n.AppendChild(p);
+                    node.AppendChild(n);
+                }
+                node = doc.CreateNode(XmlNodeType.Element, "Commands", "");
+                mainNode.AppendChild(node);
+                for (int i = 0; i < bar.Count; i++)
+                {
+                    XmlNode n = doc.CreateNode(XmlNodeType.Element, "CommandItem", "");
+                    attribute = doc.CreateAttribute("id");
+                    attribute.Value = i.ToString();
+                    n.Attributes.Append(attribute);
+
+                    XmlNode item = doc.CreateNode(XmlNodeType.Element, "GmsFileId", "");
+                    item.InnerText = bar.GmsPaths.IndexOf(bar.GmsPaths.SingleOrDefault(r => r.Contains(bar[i].GmsPath))).ToString();
+                    n.AppendChild(item);
+
+                    item = doc.CreateNode(XmlNodeType.Element, "Caption", "");
+                    item.InnerText = bar[i].Caption;
+                    n.AppendChild(item);
+
+                    item = doc.CreateNode(XmlNodeType.Element, "Command", "");
+                    item.InnerText = bar[i].Command;
+                    n.AppendChild(item);
+
+
+                    item = doc.CreateNode(XmlNodeType.Element, "Enable", "");
+                    item.InnerText = bar[i].EnableCondition;
+                    n.AppendChild(item);
+
+                    item = doc.CreateNode(XmlNodeType.Element, "Shortcut", "");
+                    item.InnerText = bar[i].ShortcutText;
+                    n.AppendChild(item);
+
+                    item = doc.CreateNode(XmlNodeType.Element, "Icon", "");
+                    FileInfo iconPathInfo = new FileInfo(bar[i].IconPath);
+                    if (iconPathInfo.Extension != ".tmp" && iconPathInfo.Exists)
+                        item.InnerText = bar[i].IconPath;
+                    n.AppendChild(item);
+
+                    node.AppendChild(n);
+                }
+
+
+                doc.AppendChild(mainNode);
+
+                doc.Save(path);
+                return true;
             }
-            node = doc.CreateNode(XmlNodeType.Element, "Commands", "");
-            mainNode.AppendChild(node);
-            for (int i = 0; i < bar.Count; i++)
-            {
-                XmlNode n = doc.CreateNode(XmlNodeType.Element, "CommandItem", "");
-                attribute = doc.CreateAttribute("id");
-                attribute.Value = i.ToString();
-                n.Attributes.Append(attribute);
-
-                XmlNode item = doc.CreateNode(XmlNodeType.Element, "GmsFileId", "");
-                item.InnerText = bar.GmsPaths.IndexOf(bar.GmsPaths.SingleOrDefault(r => r.Contains(bar[i].GmsPath))).ToString();
-                n.AppendChild(item);
-
-                item = doc.CreateNode(XmlNodeType.Element, "Caption", "");
-                item.InnerText = bar[i].Caption;
-                n.AppendChild(item);
-
-                item = doc.CreateNode(XmlNodeType.Element, "Command", "");
-                item.InnerText = bar[i].Command;
-                n.AppendChild(item);
-
-
-                item = doc.CreateNode(XmlNodeType.Element, "Enable", "");
-                item.InnerText = bar[i].EnableCondition;
-                n.AppendChild(item);
-
-                item = doc.CreateNode(XmlNodeType.Element, "Shortcut", "");
-                item.InnerText = bar[i].ShortcutText;
-                n.AppendChild(item);
-
-                item = doc.CreateNode(XmlNodeType.Element, "Icon", "");
-                FileInfo iconPathInfo = new FileInfo(bar[i].IconPath);
-                if (iconPathInfo.Extension != ".tmp" && iconPathInfo.Exists)
-                    item.InnerText = bar[i].IconPath;
-                n.AppendChild(item);
-
-                node.AppendChild(n);
-            }
-
-
-            doc.AppendChild(mainNode);
-
-            doc.Save(path);
-
+            catch { }
+            return false;
 
         }
         public static void DeSerialize(CommandBar bar,string path)

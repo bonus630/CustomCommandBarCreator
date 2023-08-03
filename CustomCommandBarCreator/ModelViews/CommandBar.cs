@@ -10,6 +10,7 @@ using System.Security.Principal;
 using System.Threading;
 
 
+
 namespace CustomCommandBarCreator.ModelViews
 {
     [Serializable]
@@ -113,7 +114,9 @@ namespace CustomCommandBarCreator.ModelViews
         public ObservableCollection<CorelVersionInfo> CorelVersions { get; set; }
         public RelayCommand<CommandBar> GenerateCommand { get; set; }
         public RelayCommand<CommandBar> SaveBarCommand { get; set; }
+        public RelayCommand<CommandBar> SaveAsBarCommand { get; set; }
         public RelayCommand<CommandBar> LoadBarCommand { get; set; }
+        public RelayCommand<CommandBar> NewBarCommand { get; set; }
         public RelayCommand<string> AddFileCommand { get; set; }
         public RelayCommand<CommandItem> AddCommandItemCommand { get; set; }
         public RelayCommand<string> RemoveFileCommand { get; set; }
@@ -132,7 +135,9 @@ namespace CustomCommandBarCreator.ModelViews
 
             GenerateCommand = new RelayCommand<CommandBar>(GenereteBar, CanGenereteBar);
             SaveBarCommand = new RelayCommand<CommandBar>(SaveBar);
+            SaveAsBarCommand = new RelayCommand<CommandBar>(SaveAsBar);
             LoadBarCommand = new RelayCommand<CommandBar>(LoadBar);
+            NewBarCommand = new RelayCommand<CommandBar>(NewBar);
 
             AddFileCommand = new RelayCommand<string>(AddFile);
             AddCommandItemCommand = new RelayCommand<CommandItem>(AddCommandItem, CanAddCommandItem);
@@ -378,25 +383,55 @@ namespace CustomCommandBarCreator.ModelViews
             else
                 resultFolder = string.Empty;
         }
+        private string filePath = string.Empty;
         private void SaveBar(CommandBar bar)
         {
-            SaveFileDialog saveFileDialog = new SaveFileDialog();
-            saveFileDialog.Filter = "Bar File (*.bar)|*.bar";
-            saveFileDialog.DefaultExt = ".bar";
-            saveFileDialog.Title = "Save your Bar Project";
-            if ((bool)saveFileDialog.ShowDialog())
+            if (string.IsNullOrEmpty(filePath))
             {
-                string path = saveFileDialog.FileName;
-                Serializer.Serialize(bar, path);
+                SaveFileDialog saveFileDialog = new SaveFileDialog();
+                saveFileDialog.Filter = "Bar File (*.bar)|*.bar";
+                saveFileDialog.DefaultExt = ".bar";
+                saveFileDialog.Title = "Save your Bar Project";
+                if ((bool)saveFileDialog.ShowDialog())
+                {
+                    string path = saveFileDialog.FileName;
+                    if (Serializer.Serialize(bar, path))
+                    {
+                        filePath = path;
+                        Dirty = false;
+                    }
+                }
             }
+            else
+            {
+                if (Serializer.Serialize(bar, filePath))
+                    Dirty = false;
+            }
+        }
+        private void SaveAsBar(CommandBar bar)
+        {
+            filePath = string.Empty;
+            SaveBar(bar);
         }
         private void LoadBar(CommandBar bar)
         {
             string[] path = GetFilePath(FileType.BAR);
             if (path == null)
                 return;
+            NewBar(bar);
             Serializer.DeSerialize(this, path[0]);
+            Dirty = false;
 
+        }
+        private void NewBar(CommandBar bar)
+        {
+            this.Name = String.Empty;
+            this.GmsPaths.Clear();
+            this.commandItems.Clear();
+            this.HaveShortcut = false;
+            this.CommandLeft = 100;
+            filePath = string.Empty;
+            Dirty = false;
         }
     
         public CommandItem this[int index]

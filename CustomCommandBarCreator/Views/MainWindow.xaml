@@ -19,12 +19,37 @@
         </ResourceDictionary>
 
     </Window.Resources>
+
+    <Window.InputBindings>
+        <KeyBinding Key="s" Modifiers="Control" CommandParameter="{Binding}" Command="{Binding SaveBarCommand}"/>
+        <KeyBinding Key="s" Modifiers="Control+Shift" CommandParameter="{Binding}" Command="{Binding SaveAsBarCommand}"/>
+        <KeyBinding Key="o" Modifiers="Control" CommandParameter="{Binding}" Command="{Binding LoadBarCommand}"/>
+        <KeyBinding Key="n" Modifiers="Control" CommandParameter="{Binding}" Command="{Binding NewBarCommand}"/>
+    </Window.InputBindings>
     <DockPanel LastChildFill="True">
         <Grid  DockPanel.Dock="Top" Height="28" VerticalAlignment="Center" >
             <Menu Margin="0,6,0,0">
                 <MenuItem Header="File" VerticalAlignment="Center">
-                    <MenuItem Header="Save" CommandParameter="{Binding}" Command="{Binding SaveBarCommand}" IsEnabled="True"/>
-                    <MenuItem Header="Load" Command="{Binding LoadBarCommand}" />
+                    <MenuItem Header="New"  CommandParameter="{Binding}" Command="{Binding NewBarCommand}" IsEnabled="True"  InputGestureText="Ctrl+N">
+                        <MenuItem.Icon>
+                            <Image Source="/Images/NewDocument.png" Width="18" Height="18"/>
+                        </MenuItem.Icon>
+                    </MenuItem>
+                    <MenuItem Header="Save" CommandParameter="{Binding}" Command="{Binding SaveBarCommand}" IsEnabled="True"  InputGestureText="Ctrl+S">
+                        <MenuItem.Icon>
+                            <Image Source="/Images/Save.png" Width="18" Height="18"/>
+                        </MenuItem.Icon>
+                    </MenuItem>
+                    <MenuItem Header="SaveAs" CommandParameter="{Binding}" Command="{Binding SaveAsBarCommand}" IsEnabled="True"  InputGestureText="Ctrl+Shift+S">
+                        <MenuItem.Icon>
+                            <Image Source="/Images/SaveAs.png" Width="18" Height="18"/>
+                        </MenuItem.Icon>
+                    </MenuItem>
+                    <MenuItem Header="Open" Command="{Binding LoadBarCommand}" IsEnabled="True" InputGestureText="Ctrl+S">
+                        <MenuItem.Icon>
+                            <Image Source="/Images/OpenFile.png" Width="18" Height="18"/>
+                        </MenuItem.Icon>
+                    </MenuItem>
                 </MenuItem>
             </Menu>
         </Grid>
@@ -40,7 +65,9 @@
                 <ColumnDefinition Width="*" />
             </Grid.ColumnDefinitions>
             <Label Grid.Row="0" Grid.Column="0" Content="CommandBar Name" VerticalAlignment="Center"/>
-            <TextBox Grid.Row="0" Grid.Column="1" Margin="6" Text="{Binding Name}" VerticalContentAlignment="Center"/>
+            <TextBox Grid.Row="0" Grid.Column="1" Margin="6,6,22,6" Text="{Binding Name}" VerticalContentAlignment="Center"/>
+            <Label Grid.Row="0" Grid.Column="1" Margin="6" Content="*" Width="16" FontWeight="Bold" HorizontalAlignment="Right" 
+                   Visibility="{Binding Dirty,Converter={StaticResource BoolToVisibilityConverter}}" />
 
 
             <!--Files-->
