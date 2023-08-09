@@ -14,6 +14,8 @@ namespace CustomCommandBarCreator.Converters
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
             var result = Visibility.Collapsed;
+            if(value is int)
+                return  (int)value > 0 ? Visibility.Visible : Visibility.Collapsed;
             if(value is bool)
                 if((bool)value)
                     result = Visibility.Visible;

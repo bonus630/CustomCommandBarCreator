@@ -13,20 +13,34 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GMSLoader", "GMSLoader\GMSL
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
 		X8 Debug|Any CPU = X8 Debug|Any CPU
 		X8 Release|Any CPU = X8 Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{1346466F-9069-4BF5-B5F9-E3FEDEEB14DF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1346466F-9069-4BF5-B5F9-E3FEDEEB14DF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1346466F-9069-4BF5-B5F9-E3FEDEEB14DF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1346466F-9069-4BF5-B5F9-E3FEDEEB14DF}.Release|Any CPU.Build.0 = Release|Any CPU
 		{1346466F-9069-4BF5-B5F9-E3FEDEEB14DF}.X8 Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{1346466F-9069-4BF5-B5F9-E3FEDEEB14DF}.X8 Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1346466F-9069-4BF5-B5F9-E3FEDEEB14DF}.X8 Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1346466F-9069-4BF5-B5F9-E3FEDEEB14DF}.X8 Release|Any CPU.Build.0 = Release|Any CPU
+		{EBB3288A-D544-44EF-82ED-ADF11EAABF65}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EBB3288A-D544-44EF-82ED-ADF11EAABF65}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{EBB3288A-D544-44EF-82ED-ADF11EAABF65}.X8 Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{EBB3288A-D544-44EF-82ED-ADF11EAABF65}.X8 Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A9F234BD-F090-4F34-8343-AA3E71365FE0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A9F234BD-F090-4F34-8343-AA3E71365FE0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A9F234BD-F090-4F34-8343-AA3E71365FE0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A9F234BD-F090-4F34-8343-AA3E71365FE0}.Release|Any CPU.Build.0 = Release|Any CPU
 		{A9F234BD-F090-4F34-8343-AA3E71365FE0}.X8 Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{A9F234BD-F090-4F34-8343-AA3E71365FE0}.X8 Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A9F234BD-F090-4F34-8343-AA3E71365FE0}.X8 Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A9F234BD-F090-4F34-8343-AA3E71365FE0}.X8 Release|Any CPU.Build.0 = Release|Any CPU
+		{81508B0E-4ACE-4155-A76B-8FA74DE41767}.Debug|Any CPU.ActiveCfg = X8 Debug|Any CPU
+		{81508B0E-4ACE-4155-A76B-8FA74DE41767}.Release|Any CPU.ActiveCfg = X8 Release|Any CPU
 		{81508B0E-4ACE-4155-A76B-8FA74DE41767}.X8 Debug|Any CPU.ActiveCfg = X8 Debug|Any CPU
 		{81508B0E-4ACE-4155-A76B-8FA74DE41767}.X8 Debug|Any CPU.Build.0 = X8 Debug|Any CPU
 		{81508B0E-4ACE-4155-A76B-8FA74DE41767}.X8 Release|Any CPU.ActiveCfg = X8 Release|Any CPU

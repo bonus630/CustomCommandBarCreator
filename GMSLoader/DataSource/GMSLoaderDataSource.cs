@@ -69,7 +69,19 @@ namespace $DataSourceName$.DataSource
                 gmp = ControlUI.corelApp.GMSManager.Projects.Load(path);
                 projects.Add(gmp);
             }
-            ControlUI.corelApp.GMSManager.RunMacro(module, macro,null);
+            GMSMacros macros = gmp.Macros;
+            for (int r = 1; r <= macros.Count; r++)
+            {
+                string name = macros[r].Name;
+          
+                if (name.Equals(macro))
+                {
+                   
+                    macros[r].Run();
+                    
+                }
+            }
+           // ControlUI.corelApp.GMSManager.RunMacro(module, macro,null);
             
         }
         public void UnloadGMS()

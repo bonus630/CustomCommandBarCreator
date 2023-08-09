@@ -16,6 +16,11 @@
             <Style TargetType="Button">
                 <Setter Property="Height" Value="28" />
             </Style>
+
+            <Style x:Key="GridViewVisibilityStyle" TargetType="GridViewColumnHeader">
+                <Setter Property="Visibility" Value="{Binding GmsPaths.Count,Converter={StaticResource BoolToVisibilityConverter}}"/>
+            </Style>
+
         </ResourceDictionary>
 
     </Window.Resources>
@@ -45,7 +50,7 @@
                             <Image Source="/Images/SaveAs.png" Width="18" Height="18"/>
                         </MenuItem.Icon>
                     </MenuItem>
-                    <MenuItem Header="Open" Command="{Binding LoadBarCommand}" IsEnabled="True" InputGestureText="Ctrl+S">
+                    <MenuItem Header="Open" Command="{Binding LoadBarCommand}" IsEnabled="True" InputGestureText="Ctrl+O">
                         <MenuItem.Icon>
                             <Image Source="/Images/OpenFile.png" Width="18" Height="18"/>
                         </MenuItem.Icon>
@@ -89,6 +94,11 @@
             </ListView.ItemContainerStyle>-->
                 <ListView.View>
                     <GridView>
+                        <GridView.ColumnHeaderContainerStyle>
+                            <Style  TargetType="GridViewColumnHeader">
+                                <Setter Property="Visibility" Value="{Binding GmsPaths.Count,Converter={StaticResource BoolToVisibilityConverter}}"/>
+                            </Style>
+                        </GridView.ColumnHeaderContainerStyle>
                         <!--<GridViewColumn  Width="28" >
                         <GridViewColumn.CellTemplate>
                             <DataTemplate>
@@ -165,6 +175,11 @@
                 </ListView.ItemContainerStyle>
                 <ListView.View>
                     <GridView>
+                        <GridView.ColumnHeaderContainerStyle>
+                            <Style  TargetType="GridViewColumnHeader">
+                                <Setter Property="Visibility" Value="{Binding CommandItems.Count,Converter={StaticResource BoolToVisibilityConverter}}"/>
+                            </Style>
+                        </GridView.ColumnHeaderContainerStyle>
                         <GridViewColumn  Width="28" >
                             <GridViewColumn.CellTemplate>
                                 <DataTemplate>
@@ -263,7 +278,7 @@
                     <ColumnDefinition Width="140"/>
                     <ColumnDefinition Width="Auto"/>
                     <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="120"/>
+                    <ColumnDefinition Width="140"/>
 
                 </Grid.ColumnDefinitions>
                 <Button CommandParameter="{Binding}" Command="{Binding GenerateCommand}"  Grid.Column="0" Grid.Row="0"   
