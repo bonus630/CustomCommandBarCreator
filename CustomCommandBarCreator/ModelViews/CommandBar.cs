@@ -8,8 +8,7 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using System.Security.Principal;
 using System.Threading;
-
-
+using System.Windows;
 
 namespace CustomCommandBarCreator.ModelViews
 {
@@ -53,7 +52,13 @@ namespace CustomCommandBarCreator.ModelViews
                 GenerateCommand.RaiseCanExecuteChanged();
             }
         }
-        [NonSerialized]
+
+        private string message;
+        public  string Message
+        {
+            get { return message; }
+         
+        }
         private string currentGMS;
 
         public string CurrentGMS
@@ -66,7 +71,6 @@ namespace CustomCommandBarCreator.ModelViews
                 OnPropertyChanged();
             }
         }
-        [NonSerialized]
         private bool attached;
 
         public bool Attached
@@ -74,7 +78,6 @@ namespace CustomCommandBarCreator.ModelViews
             get { return attached; }
             set { attached = value; OnPropertyChanged(); }
         }
-        [NonSerialized]
         private bool isAdmin;
 
         public bool IsAdmin
@@ -82,7 +85,6 @@ namespace CustomCommandBarCreator.ModelViews
             get { return isAdmin; }
             set { isAdmin = value; OnPropertyChanged(); }
         }
-        [NonSerialized]
         private string version;
 
         public string Version
@@ -90,7 +92,6 @@ namespace CustomCommandBarCreator.ModelViews
             get { return version; }
             set { version = value; OnPropertyChanged(); }
         }
-        [NonSerialized]
         private string attachButtonText = "Attach in a CorelDRW";
 
         public string AttachButtonText
@@ -102,7 +103,6 @@ namespace CustomCommandBarCreator.ModelViews
                 OnPropertyChanged();
             }
         }
-        [NonSerialized]
         private int commandLeft = 100;
 
         public int CommandLeft
@@ -154,6 +154,7 @@ namespace CustomCommandBarCreator.ModelViews
             WindowsPrincipal principal = new WindowsPrincipal(WindowsIdentity.GetCurrent());
             IsAdmin = principal.IsInRole(WindowsBuiltInRole.Administrator);
             FillCorelVersion();
+            SetMessage("Welcome!");
         }
         private void FillCorelVersion()
         {
@@ -368,16 +369,21 @@ namespace CustomCommandBarCreator.ModelViews
                 }
             }
             StructureGenerator generator = new StructureGenerator();
+            generator.GeneratorMessage += (msg) =>
+            {
+                SetMessage(msg);
+            };
             if (generator.CreateBar(bar))
             {
 
                 resultFolder = generator.Folder;
-                if(cdrVersion >= CorelVersionInfo.MinVersion)
+                if (cdrVersion >= CorelVersionInfo.MinVersion)
+                {
                     generator.CreateDataSource(resultFolder, cdrVersion);
+                }
                 else
                 {
-                    System.Windows.MessageBox.Show("DataSource is not created, please use install button in administrator level and select your bar folder to makes a correct installation","Attention!"
-                        ,System.Windows.MessageBoxButton.OK,System.Windows.MessageBoxImage.Warning);
+                    SetMessage("DataSource is not created, please use install button in administrator level and select your bar folder to makes a correct installation");
                 }
             }
             else
@@ -398,6 +404,7 @@ namespace CustomCommandBarCreator.ModelViews
                     if (Serializer.Serialize(bar, path))
                     {
                         filePath = path;
+                        SetMessage(string.Format("{0} Salved!",filePath));
                         Dirty = false;
                     }
                 }
@@ -487,14 +494,29 @@ namespace CustomCommandBarCreator.ModelViews
             return null;
 
         }
+        private void SetMessage(string msg)
+        {
+            Application.Current.Dispatcher.Invoke(()=>
+            {
+                message = msg;
+                OnPropertyChanged("Message");
+            });
+        }
         private void Install(CorelVersionInfo version)
         {
+            bool sucess = true;
             if (version == null)
                 return;
             try
             {
             
                 StructureGenerator generator = new StructureGenerator();
+                generator.GeneratorMessage += (msg) =>
+                    {
+                        SetMessage(msg);
+                    };
+            
+              
                 resultFolder = generator.SelectBarFolder();
 
                 if (!this.resultFolder.Equals(string.Empty))
@@ -515,16 +537,29 @@ namespace CustomCommandBarCreator.ModelViews
 
                             for (int i = 0; i < files.Length; i++)
                             {
-                                files[i].CopyTo(Path.Combine(addonDir.FullName, files[i].Name), true);
+                                try
+                                {
+                                    SetMessage(string.Format("Copying the file {0}", files[i].Name));
+                                    files[i].CopyTo(Path.Combine(addonDir.FullName, files[i].Name), true);
+                                }
+                                catch
+                                {
+                                    sucess = false;
+                                }
                             }
-                           
+                            if (sucess)
+                                SetMessage("Installation is completed!");
+                            else
+                                SetMessage("Installation failure!");
+
                         };
+
                         generator.CreateDataSource(resultFolder, version.CorelVersion);
 
 
                     }
                     catch {
-                     
+                        sucess = false;
                     }
                 }
 
@@ -532,10 +567,11 @@ namespace CustomCommandBarCreator.ModelViews
             }
             catch
             {
-
+                sucess = false;
             }
+            
+        
         }
-        [NonSerialized]
         private bool canInstall = true;
         private bool CanInstall(CorelVersionInfo version)
         {

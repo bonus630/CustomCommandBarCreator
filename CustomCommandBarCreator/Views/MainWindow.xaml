@@ -31,9 +31,11 @@
         <KeyBinding Key="o" Modifiers="Control" CommandParameter="{Binding}" Command="{Binding LoadBarCommand}"/>
         <KeyBinding Key="n" Modifiers="Control" CommandParameter="{Binding}" Command="{Binding NewBarCommand}"/>
     </Window.InputBindings>
-    <DockPanel LastChildFill="True">
+    <DockPanel LastChildFill="True" Background="#D4D4D4">
         <Grid  DockPanel.Dock="Top" Height="28" VerticalAlignment="Center" >
-            <Menu Margin="0,6,0,0">
+            
+            <Menu Margin="0,6,0,0" Background="Transparent">
+                
                 <MenuItem Header="File" VerticalAlignment="Center">
                     <MenuItem Header="New"  CommandParameter="{Binding}" Command="{Binding NewBarCommand}" IsEnabled="True"  InputGestureText="Ctrl+N">
                         <MenuItem.Icon>
@@ -57,13 +59,20 @@
                     </MenuItem>
                 </MenuItem>
             </Menu>
+
         </Grid>
-        <Grid DockPanel.Dock="Bottom">
+        <Grid Background="#D4D4D4" DockPanel.Dock="Bottom">
+
+            <Label  Content="{Binding Message,FallbackValue=Message}" HorizontalAlignment="Right" Margin="0,0,6,0" />
+        </Grid>
+        <Border  DockPanel.Dock="Bottom"  Background="#FFFFFF" Margin="4,0,4,0" BorderBrush="#B4B4B4" BorderThickness="1">
+        <Grid>
             <Grid.RowDefinitions>
                 <RowDefinition Height="40" />
                 <RowDefinition  />
                 <RowDefinition  />
                 <RowDefinition Height="40" />
+               
             </Grid.RowDefinitions>
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="120"/>
@@ -279,7 +288,6 @@
                     <ColumnDefinition Width="Auto"/>
                     <ColumnDefinition Width="*"/>
                     <ColumnDefinition Width="140"/>
-
                 </Grid.ColumnDefinitions>
                 <Button CommandParameter="{Binding}" Command="{Binding GenerateCommand}"  Grid.Column="0" Grid.Row="0"   
                     Margin="6" ToolTip="generate your command bar compose files">
@@ -318,7 +326,7 @@
                         Visibility="{Binding IsAdmin,Converter={StaticResource BoolToVisibilityConverter}}" >
                     <Button Content="Install In" CommandParameter="{Binding ElementName=cb_cdrVersions,Path=SelectedItem}"
                             Command="{Binding InstallCommand}" Padding="4"/>
-                    <ComboBox ItemsSource="{Binding CorelVersions}"  Name="cb_cdrVersions" Height="28">
+                    <ComboBox ItemsSource="{Binding CorelVersions}"  Name="cb_cdrVersions" Height="28" Padding="0" Width="60" HorizontalContentAlignment="Right">
                         <ComboBox.ItemTemplate>
                             <DataTemplate>
                                 <Label Content="{Binding CorelAbreviation}" />
@@ -328,6 +336,8 @@
                 </StackPanel>
 
             </Grid>
+         
         </Grid>
+    </Border>
     </DockPanel>
 </Window>

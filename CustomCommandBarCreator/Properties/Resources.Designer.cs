@@ -117,6 +117,16 @@ namespace CustomCommandBarCreator.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Byte[].
         /// </summary>
+        internal static byte[] MSBuildLogger {
+            get {
+                object obj = ResourceManager.GetObject("MSBuildLogger", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Byte[].
+        /// </summary>
         internal static byte[] ProjectHelper {
             get {
                 object obj = ResourceManager.GetObject("ProjectHelper", resourceCulture);

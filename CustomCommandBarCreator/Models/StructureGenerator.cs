@@ -4,6 +4,7 @@ using System.IO;
 using System.IO.Compression;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Windows.Controls;
 using System.Windows.Forms;
 using Vestris.ResourceLib;
@@ -14,7 +15,10 @@ namespace CustomCommandBarCreator.Models
     {
         public string Folder { get; protected set; }
         readonly int StartIconId = 100;
+        
         public event Action BuildDataSourceFinish;
+        public event Action AllTasksFinish;
+        public event Action<string> GeneratorMessage;
         public string DsName { get; protected set; }
 
 
@@ -26,13 +30,21 @@ namespace CustomCommandBarCreator.Models
 
 
                 if (!SelectFolderEmpty())
+                {
+                    GeneratorMessage?.Invoke("Invalid Folder!");
                     return false;
-
+                }
+                GeneratorMessage?.Invoke("Creating the \"CorelAddon\" file");
                 CreateCorelAddon();
+                GeneratorMessage?.Invoke("Creating the \"XSLT\" files");
                 CreateXSLT(bar);
+                GeneratorMessage?.Invoke("Coping GMS files");
                 CopyGMS(bar);
+                GeneratorMessage?.Invoke("Merging icons");
                 InsertIcons(bar);
+                GeneratorMessage?.Invoke("Creating the \"Config\" file");
                 CreateConfigXml(bar);
+                GeneratorMessage?.Invoke("Writing the \"Table\" file");
                 WriteTable(bar);
 
                 result = true;
@@ -308,18 +320,41 @@ namespace CustomCommandBarCreator.Models
         }
         private void BuildDataSource(string projectDir, int corelVersion)
         {
-            Builder builder = new Builder();
-            builder.ProjectPath = string.Format("{0}\\GMSLoader.csproj", projectDir);
-            builder.CorelVersion = corelVersion;
-
-            builder.Finish += (b) =>
+            Thread t = new Thread(() =>
             {
-                if (b)
+                Builder builder = new Builder();
+                builder.ProjectPath = string.Format("{0}\\GMSLoader.csproj", projectDir);
+                builder.CorelVersion = corelVersion;
+                builder.ErrorReceived += (erro) =>
                 {
-                    BuildDataSourceFinish?.Invoke();
+                    GeneratorMessage?.Invoke(erro);
+                };
+                builder.DataReceived += (data) =>
+                {
+                    GeneratorMessage?.Invoke(data);
+                };
+                builder.Finish += (b) =>
+                {
+                    if (b)
+                    {
+                       
+                        GeneratorMessage?.Invoke("Build DataSource completed");
+                        BuildDataSourceFinish?.Invoke();
+                    }
+                };
+                GeneratorMessage?.Invoke("Starting DataSource build");
+                try
+                {
+                    builder.Run();
                 }
-            };
-            builder.Run();
+                catch(Exception ex) 
+                {
+                    GeneratorMessage?.Invoke(ex.Message);
+                }
+
+            });
+            t.IsBackground = true;
+            t.Start();
         }
 
 

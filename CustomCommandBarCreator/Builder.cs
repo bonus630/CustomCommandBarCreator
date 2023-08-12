@@ -2,6 +2,7 @@
 using System;
 using System.Diagnostics;
 using System.IO;
+using System.Reflection;
 
 namespace CustomCommandBarCreator
 {
@@ -9,8 +10,7 @@ namespace CustomCommandBarCreator
     {
 
         protected string msbuildPath;
-        //private string loggerDll;
-        //protected string loggerVariable;
+        protected string loggerVariable;
         protected string toolsVersionVariable;
         public string ProjectPath { get; set; }
         private bool sucess = true;
@@ -36,14 +36,12 @@ namespace CustomCommandBarCreator
             else
                 msbuildPath = string.Format("{0}\\MSBuild.exe", path);
 
-            //loggerDll = Path.Combine(Application.StartupPath, "MSBuildLogger.dll");
-            //if (File.Exists(loggerDll))
-            //    loggerVariable = string.Format(" /logger:\"{0}\"", loggerDll);
+           string loggerDll = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) + "\\MSBuildLogger.dll" ;
+
+            if (File.Exists(loggerDll))
+                loggerVariable = string.Format(" /logger:\"{0}\"", loggerDll);
             FileInfo sol = new FileInfo(ProjectPath);
-            //loggerDll = Path.Combine(sol.Directory.Parent.FullName, "MSBuildLogger.dll");
-            //if (File.Exists(loggerDll))
-            //    loggerVariable = string.Format(" /logger:\"{0}\"", loggerDll);
-            toolsVersionVariable = "";// string.Format(" /tv:{0}.{1}", ver.Major, ver.Minor);
+  
 
 
         }
@@ -53,24 +51,21 @@ namespace CustomCommandBarCreator
                 SetMsBuildPath();
 
             Process psi = new Process();
-            //ProcessStartInfo psi = new ProcessStartInfo();
-            psi.StartInfo.CreateNoWindow = false;
+            psi.StartInfo.CreateNoWindow = true;
             psi.StartInfo.UseShellExecute = false;
             psi.EnableRaisingEvents = true;
             psi.StartInfo.FileName = msbuildPath;
-           // psi.StartInfo.Arguments = string.Format("\"{0}\" /p:Configuration=\"{1}\" /v:d /nologo /noconsolelogger{2}"
-           //     , projectFileName, configurationName, toolsVersionVariable);
-            psi.StartInfo.Arguments = string.Format("\"{0}\" /p:Configuration=\"{1}\""
-                , projectFileName, configurationName, toolsVersionVariable);
-          //  psi.StartInfo.RedirectStandardOutput = true;
-          //  psi.StartInfo.RedirectStandardError = true;
-       
+            psi.StartInfo.Arguments = string.Format("\"{0}\" /p:Configuration=\"{1}\" {2}"
+                , projectFileName, configurationName, loggerVariable);
+            psi.StartInfo.RedirectStandardOutput = true;
+            psi.StartInfo.RedirectStandardError = true;
+            psi.OutputDataReceived += R_OutputDataReceived;
             psi.ErrorDataReceived += Psi_ErrorDataReceived;
             psi.Exited += Psi_Exited;
             psi.Start();
-            //psi.BeginOutputReadLine();
-           // psi.BeginErrorReadLine();
-            psi.WaitForExit();
+            psi.BeginOutputReadLine();
+            psi.BeginErrorReadLine();
+            //psi.WaitForExit();
             //psi.CancelOutputRead();
             //psi.CancelErrorRead();
 
@@ -92,28 +87,28 @@ namespace CustomCommandBarCreator
             OnFinish();
         }
 
-        //private void R_OutputDataReceived(object sender, DataReceivedEventArgs e)
-        //{
-        //    if (e.Data == null)
-        //        return;
-        //    if (e.Data.StartsWith("MSG"))
-        //    {
-        //        if (DataReceived != null)
-        //            DataReceived(e.Data.Replace("MSG:", ""));
-        //    }
-        //    if (e.Data.StartsWith("SUCESS"))
-        //    {
-        //        bool finish = Boolean.TryParse(e.Data.Replace("SUCESS:", ""), out sucess);
-        //    }
-        //    if (e.Data.StartsWith("ERROR"))
-        //    {
-        //        if (ErrorReceived != null)
-        //            ErrorReceived(e.Data);
-        //    }
+        private void R_OutputDataReceived(object sender, DataReceivedEventArgs e)
+        {
+            if (e.Data == null)
+                return;
+            if (e.Data.StartsWith("MSG"))
+            {
+                if (DataReceived != null)
+                    DataReceived(e.Data.Replace("MSG:", ""));
+            }
+            if (e.Data.StartsWith("SUCESS"))
+            {
+                bool finish = Boolean.TryParse(e.Data.Replace("SUCESS:", ""), out sucess);
+            }
+            if (e.Data.StartsWith("ERROR"))
+            {
+                if (ErrorReceived != null)
+                    ErrorReceived(e.Data);
+            }
 
 
 
-        //}
+        }
 
 
 
@@ -122,8 +117,6 @@ namespace CustomCommandBarCreator
         public int CorelVersion { protected get; set; }
         public void Run()
         {
-            //StartMSBuild(string.Format("/nologo /noconsolelogger /logger:{2}, \"{3}\", Version = {4}, Culture = neutral \"{0}\" /p:Configuration=\"{1}\" /m" ,
-            //    SolutionPath, configuration[CorelVersion - 17], "PackInstaller.MSBuildLogger", Application.ExecutablePath, Application.ProductVersion));
             StartMSBuild(ProjectPath, CorelVersionInfo.GetCorelAbreviation(CorelVersion) + " Release");
 
             if (string.IsNullOrEmpty(msbuildPath))

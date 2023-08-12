@@ -172,5 +172,8 @@
     <Resource Include="Images\Save.png" />
     <Resource Include="Images\SaveAs.png" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\MSBuildLogger.dll" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
