@@ -2,9 +2,11 @@
 using Microsoft.Win32;
 using System;
 using System.Collections.ObjectModel;
+using System.Diagnostics.Eventing.Reader;
 using System.Drawing;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Security.Principal;
 using System.Threading;
@@ -71,12 +73,22 @@ namespace CustomCommandBarCreator.ModelViews
                 OnPropertyChanged();
             }
         }
-        private bool attached;
+        private bool? attached = false;
 
-        public bool Attached
+        public bool? Attached
         {
             get { return attached; }
-            set { attached = value; OnPropertyChanged(); }
+            set { 
+                attached = value; 
+
+                if(value == null)
+                    AttachButtonText = "Please Wait!";
+                else if(value == true)
+                    AttachButtonText = "Deattach";
+                else
+                    AttachButtonText = "Attach in a CorelDRW";
+
+                OnPropertyChanged(); }
         }
         private bool isAdmin;
 
@@ -138,7 +150,6 @@ namespace CustomCommandBarCreator.ModelViews
             SaveAsBarCommand = new RelayCommand<CommandBar>(SaveAsBar);
             LoadBarCommand = new RelayCommand<CommandBar>(LoadBar);
             NewBarCommand = new RelayCommand<CommandBar>(NewBar);
-
             AddFileCommand = new RelayCommand<string>(AddFile);
             AddCommandItemCommand = new RelayCommand<CommandItem>(AddCommandItem, CanAddCommandItem);
             RemoveFileCommand = new RelayCommand<string>(RemoveFile);
@@ -154,7 +165,7 @@ namespace CustomCommandBarCreator.ModelViews
             WindowsPrincipal principal = new WindowsPrincipal(WindowsIdentity.GetCurrent());
             IsAdmin = principal.IsInRole(WindowsBuiltInRole.Administrator);
             FillCorelVersion();
-            SetMessage("Welcome!");
+            SetMessage(string.Format("Welcome | Version.: {0}",Assembly.GetExecutingAssembly().GetName().Version));
         }
         private void FillCorelVersion()
         {
@@ -173,35 +184,42 @@ namespace CustomCommandBarCreator.ModelViews
         {
 
 
-            if (!attached)
+            if (attached== false)
                 return;
-            dynamic corelApp = app as dynamic;
-            if (!corelApp.InitializeVBA())
-                return;
-            ObservableCollection<string> result = new ObservableCollection<string>();
-            dynamic gmp = corelApp.GMSManager.Projects.Load(obj);
-            dynamic macros = gmp.Macros;
-
-            for (int r = 1; r <= macros.Count; r++)
+            try
             {
-                string name = string.Format("{0}.{1}", gmp.Name, macros[r].Name);
+                dynamic corelApp = app as dynamic;
+                if (!corelApp.InitializeVBA())
+                    return;
+                ObservableCollection<string> result = new ObservableCollection<string>();
+                dynamic gmp = corelApp.GMSManager.Projects.Load(obj);
+                dynamic macros = gmp.Macros;
 
-                result.Add(name);
-            }
-            gmp.Unload();
-
-
-
-            for (int i = 0; i < this.Count; i++)
-            {
-                if (this[i].Selected)
+                for (int r = 1; r <= macros.Count; r++)
                 {
-                    this[i].Commands = result;
-                    this[i].Command = result[0];
-                    this[i].GmsPath = obj.Substring(obj.LastIndexOf("\\") + 1).Split('.')[0];
+                    string name = string.Format("{0}.{1}", gmp.Name, macros[r].Name);
+
+                    result.Add(name);
                 }
+                gmp.Unload();
+
+
+
+                for (int i = 0; i < this.Count; i++)
+                {
+                    if (this[i].Selected)
+                    {
+                        this[i].Commands = result;
+                        this[i].Command = result[0];
+                        this[i].GmsPath = obj.Substring(obj.LastIndexOf("\\") + 1).Split('.')[0];
+                    }
+                }
+                GenerateCommand.RaiseCanExecuteChanged();
             }
-            GenerateCommand.RaiseCanExecuteChanged();
+            catch
+            {
+                this.Attached = false;
+            }
         }
         private void LinkGMSSelect(string obj)
         {
@@ -214,13 +232,14 @@ namespace CustomCommandBarCreator.ModelViews
             }
             GenerateCommand.RaiseCanExecuteChanged();
         }
-        [NonSerialized]
         object app = null;
-        [NonSerialized]
         private int cdrVersion;
+
         private void AttachCorelDRW(object obj)
         {
-            if (attached)
+            if (Attached == null)
+                return;
+            if (attached == true)
             {
                 try
                 {
@@ -228,7 +247,6 @@ namespace CustomCommandBarCreator.ModelViews
                     Marshal.ReleaseComObject(app);
                     app = null;
                     this.Attached = false;
-                    AttachButtonText = "Attach in a CorelDRW";
                 }
                 catch { }
             }
@@ -236,16 +254,32 @@ namespace CustomCommandBarCreator.ModelViews
             {
                 Thread thread = new Thread(() =>
                 {
-                    AttachButtonText = "Please Wait!";
-                    Type pia_type = Type.GetTypeFromProgID("CorelDRAW.Application");
-                    app = Activator.CreateInstance(pia_type);
+                    try
+                    {
+                        this.Attached = null;
+
+                        Type pia_type = Type.GetTypeFromProgID("CorelDRAW.Application");
+                        app = Activator.CreateInstance(pia_type);
+                    }
+                    catch
+                    {
+                        SetMessage("Failed to start CorelDraw");
+                        this.Attached = false;
+                    }
                     if (app != null)
                     {
-
+                        try
+                        {
+                            this.Attached = true;
+                    
+                            cdrVersion = (app as dynamic).VersionMajor;
+                            Version = string.Format("{0} {1}", (app as dynamic).Name, (app as dynamic).Version);
+                        }
+                        catch
+                        {
+                            SetMessage("Failed to retrieve CorelDraw Version");
+                        }
                         this.Attached = true;
-                        cdrVersion = (app as dynamic).VersionMajor;
-                        Version = string.Format("{0} {1}", (app as dynamic).Name, (app as dynamic).Version);
-                        AttachButtonText = "Deattach";
                     }
                 });
                 thread.IsBackground = true;
@@ -254,7 +288,7 @@ namespace CustomCommandBarCreator.ModelViews
         }
         public void SendTo(object obj)
         {
-            if (attached)
+            if (attached == true)
             {
                 string addonPath = (app as dynamic).AddonPath;
                 if (!this.resultFolder.Equals(string.Empty))
@@ -272,7 +306,9 @@ namespace CustomCommandBarCreator.ModelViews
                         }
 
                     }
-                    catch { }
+                    catch {
+                        SetMessage("Failed to send files to Addon Folder");
+                    }
                 }
             }
         }
@@ -299,7 +335,7 @@ namespace CustomCommandBarCreator.ModelViews
             }
             catch
             {
-
+                SetMessage("Failed to Save a GMS Folder!");
             }
             for (int i = 0; i < files.Length; i++)
             {
@@ -474,7 +510,9 @@ namespace CustomCommandBarCreator.ModelViews
                     {
                         startFolder = Properties.Settings.Default.LastGMSFolder;
                     }
-                    catch { }
+                    catch {
+                        SetMessage("Failed to load GMS Folder!");
+                    }
                     multiselect = true;
                     break;
                 case FileType.BAR:
@@ -545,12 +583,12 @@ namespace CustomCommandBarCreator.ModelViews
                                 catch
                                 {
                                     sucess = false;
+                                    SetMessage(string.Format("Copy file:{0} failed!", files[i].Name));
                                 }
                             }
                             if (sucess)
                                 SetMessage("Installation is completed!");
-                            else
-                                SetMessage("Installation failure!");
+                    
 
                         };
 

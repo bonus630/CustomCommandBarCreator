@@ -79,7 +79,8 @@
                 <ColumnDefinition Width="*" />
             </Grid.ColumnDefinitions>
             <Label Grid.Row="0" Grid.Column="0" Content="CommandBar Name" VerticalAlignment="Center"/>
-            <TextBox Grid.Row="0" Grid.Column="1" Margin="6,6,22,6" Text="{Binding Name}" VerticalContentAlignment="Center"/>
+            <TextBox Grid.Row="0" Grid.Column="1" Margin="6,6,22,6"  VerticalContentAlignment="Center"
+                     Text="{Binding Name,Delay=500,UpdateSourceTrigger=PropertyChanged}"/>
             <Label Grid.Row="0" Grid.Column="1" Margin="6" Content="*" Width="16" FontWeight="Bold" HorizontalAlignment="Right" 
                    Visibility="{Binding Dirty,Converter={StaticResource BoolToVisibilityConverter}}" />
 

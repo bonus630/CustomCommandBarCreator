@@ -356,6 +356,50 @@ namespace CustomCommandBarCreator.Models
             t.IsBackground = true;
             t.Start();
         }
+        private void ApplyFolderIcon(string targetFolderPath,string localIcon="",string description = "")
+        {
+            if (string.IsNullOrEmpty(localIcon) && string.IsNullOrEmpty(description))
+                return;
+            if (!Directory.Exists(targetFolderPath))
+                return;
+            var iniPath = Path.Combine(targetFolderPath, "desktop.ini");
+            if (File.Exists(iniPath))
+            {
+                //remove hidden and system attributes to make ini file writable
+                File.SetAttributes(
+                   iniPath,
+                   File.GetAttributes(iniPath) &
+                   ~(FileAttributes.Hidden | FileAttributes.System));
+            }
+            string iconPath = string.Format("{0}\\icon.ico", targetFolderPath);
+            if (!File.Exists(iconPath) && !string.IsNullOrEmpty(localIcon))
+            {
+                File.Copy(localIcon, iconPath, true);
+                File.SetAttributes(iconPath, File.GetAttributes(iconPath) | FileAttributes.Hidden | FileAttributes.System);
+            }
+            //create new ini file with the required contents
+            StringBuilder iniContents = new StringBuilder();
+            iniContents.AppendLine("[.ShellClassInfo]");
+            iniContents.AppendLine("ConfirmFileOp=0");
+            if (!string.IsNullOrEmpty(localIcon)) {
+                iniContents.AppendLine(string.Format("IconResource={0},0", iconPath));
+                iniContents.AppendLine(string.Format("IconFile={0}", iconPath));
+                iniContents.AppendLine("IconIndex=0");
+            }
+            if (!string.IsNullOrEmpty(localIcon))
+                iniContents.AppendLine(string.Format("InfoTip={0}", description));
+              
+            File.WriteAllText(iniPath, iniContents.ToString());
+
+            //hide the ini file and set it as system
+            File.SetAttributes(
+               iniPath,
+               File.GetAttributes(iniPath) | FileAttributes.Hidden | FileAttributes.System);
+            //set the folder as system
+            File.SetAttributes(
+                targetFolderPath,
+                File.GetAttributes(targetFolderPath) | FileAttributes.System);
+        }
 
 
     }
