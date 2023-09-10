@@ -140,8 +140,8 @@ namespace CustomCommandBarCreator.Models
                         }
 
                     }
-                   
-                    return false;
+                    else
+                        return false;
                 }
                 if(Directory.GetFiles(path).Length > 0)
                     return false;
@@ -290,7 +290,7 @@ namespace CustomCommandBarCreator.Models
 
             string[] files = { "GMSLoader.csproj", "ControlUI.xaml.cs", "ControlUI.xaml", "Properties\\AssemblyInfo.cs"
             ,"DataSource\\BaseDataSource.cs","DataSource\\DataSourceFactory.cs","DataSource\\GMSLoaderDataSource.cs"};
-            int[][] ids = { new int[] { 15, 16, 205 }, new int[] { 3, 8, 17 }, new int[] { 0, 5 }, new int[] { 7, 11 }
+            int[][] ids = { new int[] { 13, 14, 142 }, new int[] { 6, 11, 20,33 }, new int[] { 0, 5 }, new int[] { 7, 11 }
             , new int[] { 10 }, new int[] { 6 }, new int[] { 7, 11,15,49 }};
 
             for (int i = 0; i < files.Length; i++)

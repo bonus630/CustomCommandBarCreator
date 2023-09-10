@@ -143,20 +143,27 @@ namespace CustomCommandBarCreator.Models
 
         private string generateShortcut()
         {
+            			
+	
+
+		
             if (!commandBar.HaveShortcut)
                 return "";
 
             StringBuilder sb = new StringBuilder();
-            sb.AppendLine("<xsl:template match=\"uiConfig/shortcutKeyTables/table[@tableID='bc175625-191c-4b95-9053-756e5eee26fe']\">");
+            sb.AppendLine("\t<xsl:template match=\"uiConfig/shortcutKeyTables/table[@tableID='bc175625-191c-4b95-9053-756e5eee26fe']\">");
             sb.AppendLine("\t\t<xsl:copy>");
-            sb.AppendLine("\t\t\t<xsl:copy-of select=\"@*\"/>");
-
+            sb.AppendLine("\t\t\t<xsl:apply-templates select=\"node()|@*\"/>");
+       
 
             for (int i = 0; i < commandBar.Count; i++)
             {
                 if (commandBar[i].Shortcuts.Length == 0)
                     continue;
-                sb.Append("\t\t<keySequence itemRef=\"");
+                sb.Append("\t\t\t<xsl:if test=\"not(./keySequence[@itemRef='");
+                sb.Append(commandBar[i].Guid);
+                sb.AppendLine("'])\">");
+                sb.Append("\t\t\t\t<keySequence itemRef=\"");
                 sb.Append(commandBar[i].Guid);
                 sb.AppendLine("\">");
 
@@ -165,7 +172,7 @@ namespace CustomCommandBarCreator.Models
                 {
 
 
-                    sb.Append("\t\t<key");
+                    sb.Append("\t\t\t\t\t<key");
                     if (commandBar[i].Shortcuts[s].Control)
                         sb.Append(" ctrl=\"true\"");
                     if (commandBar[i].Shortcuts[s].Shift)
@@ -181,11 +188,14 @@ namespace CustomCommandBarCreator.Models
 
 
 
-                sb.AppendLine("\t\t</keySequence>");
+                sb.AppendLine("\t\t\t\t</keySequence>");
+                sb.AppendLine("\t\t\t</xsl:if>");
+
+
             }
 
             sb.AppendLine("\t\t</xsl:copy>");
-            sb.AppendLine("</xsl:template>");
+            sb.AppendLine("\t</xsl:template>");
 
 
             return sb.ToString();
