@@ -11,6 +11,7 @@ using System.Runtime.InteropServices;
 using System.Security.Principal;
 using System.Threading;
 using System.Windows;
+using System.Windows.Threading;
 
 namespace CustomCommandBarCreator.ModelViews
 {
@@ -18,7 +19,7 @@ namespace CustomCommandBarCreator.ModelViews
     public class CommandBar : ControlItem
     {
         // private bool canGenerate = false;
-        
+        public event Action<string> NewMessageComming;
         private ObservableCollection<string> gmsPaths;
 
         public ObservableCollection<string> GmsPaths
@@ -42,7 +43,7 @@ namespace CustomCommandBarCreator.ModelViews
                 OnPropertyChanged();
             }
         }
-
+        public Dispatcher Dispatcher { get; set; }
         private string name;
         public new string Name
         {
@@ -56,10 +57,12 @@ namespace CustomCommandBarCreator.ModelViews
         }
 
         private string message;
-        public  string Message
+        public string Message
         {
             get { return message; }
-         
+            set { message = value;
+                OnPropertyChanged();
+            }
         }
         private string currentGMS;
 
@@ -78,17 +81,19 @@ namespace CustomCommandBarCreator.ModelViews
         public bool? Attached
         {
             get { return attached; }
-            set { 
-                attached = value; 
+            set
+            {
+                attached = value;
 
-                if(value == null)
+                if (value == null)
                     AttachButtonText = "Please Wait!";
-                else if(value == true)
+                else if (value == true)
                     AttachButtonText = "Deattach";
                 else
                     AttachButtonText = "Attach in a CorelDRW";
 
-                OnPropertyChanged(); }
+                OnPropertyChanged();
+            }
         }
         private bool isAdmin;
 
@@ -122,7 +127,7 @@ namespace CustomCommandBarCreator.ModelViews
             get { return commandLeft; }
             set { commandLeft = value; OnPropertyChanged(); }
         }
-       
+
         public ObservableCollection<CorelVersionInfo> CorelVersions { get; set; }
         public RelayCommand<CommandBar> GenerateCommand { get; set; }
         public RelayCommand<CommandBar> SaveBarCommand { get; set; }
@@ -144,7 +149,21 @@ namespace CustomCommandBarCreator.ModelViews
 
         public CommandBar() : base()
         {
-
+            InitializeCommands();
+            WindowsPrincipal principal = new WindowsPrincipal(WindowsIdentity.GetCurrent());
+            IsAdmin = principal.IsInRole(WindowsBuiltInRole.Administrator);
+            FillCorelVersion();
+            SetMessage(string.Format("Welcome | Version.: {0}", Assembly.GetExecutingAssembly().GetName().Version));
+        }
+        public CommandBar(bool incorel):base()
+        {
+            InitializeCommands();
+            WindowsPrincipal principal = new WindowsPrincipal(WindowsIdentity.GetCurrent());
+            IsAdmin = principal.IsInRole(WindowsBuiltInRole.Administrator);
+            FillCorelVersion();
+        }
+        private void InitializeCommands()
+        {
             GenerateCommand = new RelayCommand<CommandBar>(GenereteBar, CanGenereteBar);
             SaveBarCommand = new RelayCommand<CommandBar>(SaveBar);
             SaveAsBarCommand = new RelayCommand<CommandBar>(SaveAsBar);
@@ -159,13 +178,7 @@ namespace CustomCommandBarCreator.ModelViews
             SendToCommand = new RelayCommand<object>(SendTo);
             SetCommand = new RelayCommand<string>(CurrentGMSSelect);
             LinkCommand = new RelayCommand<string>(LinkGMSSelect);
-            InstallCommand = new RelayCommand<CorelVersionInfo>(Install,CanInstall);
-
-
-            WindowsPrincipal principal = new WindowsPrincipal(WindowsIdentity.GetCurrent());
-            IsAdmin = principal.IsInRole(WindowsBuiltInRole.Administrator);
-            FillCorelVersion();
-            SetMessage(string.Format("Welcome | Version.: {0}",Assembly.GetExecutingAssembly().GetName().Version));
+            InstallCommand = new RelayCommand<CorelVersionInfo>(Install, CanInstall);
         }
         private void FillCorelVersion()
         {
@@ -184,7 +197,7 @@ namespace CustomCommandBarCreator.ModelViews
         {
 
 
-            if (attached== false)
+            if (attached == false)
                 return;
             try
             {
@@ -232,6 +245,13 @@ namespace CustomCommandBarCreator.ModelViews
             }
             GenerateCommand.RaiseCanExecuteChanged();
         }
+        public void InCorel(object corelApp)
+        {
+            app = corelApp;
+            cdrVersion = (app as dynamic).VersionMajor;
+            Version = string.Format("{0} {1}", (app as dynamic).Name, (app as dynamic).Version);
+            this.Attached = true;
+        }
         object app = null;
         private int cdrVersion;
 
@@ -271,7 +291,7 @@ namespace CustomCommandBarCreator.ModelViews
                         try
                         {
                             this.Attached = true;
-                    
+
                             cdrVersion = (app as dynamic).VersionMajor;
                             Version = string.Format("{0} {1}", (app as dynamic).Name, (app as dynamic).Version);
                         }
@@ -306,7 +326,8 @@ namespace CustomCommandBarCreator.ModelViews
                         }
 
                     }
-                    catch {
+                    catch
+                    {
                         SetMessage("Failed to send files to Addon Folder");
                     }
                 }
@@ -440,7 +461,7 @@ namespace CustomCommandBarCreator.ModelViews
                     if (Serializer.Serialize(bar, path))
                     {
                         filePath = path;
-                        SetMessage(string.Format("{0} Salved!",filePath));
+                        SetMessage(string.Format("{0} Salved!", filePath));
                         Dirty = false;
                     }
                 }
@@ -476,14 +497,14 @@ namespace CustomCommandBarCreator.ModelViews
             filePath = string.Empty;
             Dirty = false;
         }
-    
+
         public CommandItem this[int index]
         {
             get { return commandItems[index]; }
             set { commandItems[index] = value; }
         }
 
- 
+
         public int Count { get => commandItems.Count; }
         public bool HaveShortcut { get; protected set; }
 
@@ -510,7 +531,8 @@ namespace CustomCommandBarCreator.ModelViews
                     {
                         startFolder = Properties.Settings.Default.LastGMSFolder;
                     }
-                    catch {
+                    catch
+                    {
                         SetMessage("Failed to load GMS Folder!");
                     }
                     multiselect = true;
@@ -534,11 +556,7 @@ namespace CustomCommandBarCreator.ModelViews
         }
         private void SetMessage(string msg)
         {
-            Application.Current.Dispatcher.Invoke(()=>
-            {
-                message = msg;
-                OnPropertyChanged("Message");
-            });
+            NewMessageComming?.Invoke(msg);
         }
         private void Install(CorelVersionInfo version)
         {
@@ -547,14 +565,14 @@ namespace CustomCommandBarCreator.ModelViews
                 return;
             try
             {
-            
+
                 StructureGenerator generator = new StructureGenerator();
                 generator.GeneratorMessage += (msg) =>
                     {
                         SetMessage(msg);
                     };
-            
-              
+
+
                 resultFolder = generator.SelectBarFolder();
 
                 if (!this.resultFolder.Equals(string.Empty))
@@ -588,7 +606,7 @@ namespace CustomCommandBarCreator.ModelViews
                             }
                             if (sucess)
                                 SetMessage("Installation is completed!");
-                    
+
 
                         };
 
@@ -596,7 +614,8 @@ namespace CustomCommandBarCreator.ModelViews
 
 
                     }
-                    catch {
+                    catch
+                    {
                         sucess = false;
                     }
                 }
@@ -607,8 +626,8 @@ namespace CustomCommandBarCreator.ModelViews
             {
                 sucess = false;
             }
-            
-        
+
+
         }
         private bool canInstall = true;
         private bool CanInstall(CorelVersionInfo version)

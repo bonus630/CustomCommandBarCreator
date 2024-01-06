@@ -11,6 +11,7 @@ using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Documents;
 using System.Windows.Input;
+using System.Windows.Interop;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
@@ -45,13 +46,34 @@ namespace CustomCommandBarCreator.Views
                 Application.Current.Shutdown(100);
             }
             InitializeComponent();
-
-            commandBar = new ModelViews.CommandBar();
-            commandBar.GmsPaths = new ObservableCollection<string>();
-            commandBar.CommandItems = new System.Collections.ObjectModel.ObservableCollection<ModelViews.CommandItem>();
-            this.DataContext = commandBar;
+            InitializeDataContext(false);
+            
          
             //object obj = System.Runtime.InteropServices.Marshal.GetActiveObject("CorelDRAW.Application.18");
+        }
+        public MainWindow(object corelApp)
+        {
+          
+            InitializeComponent();
+            InitializeDataContext(true);
+      
+            commandBar.InCorel(corelApp);
+           
+        }
+        private void InitializeDataContext(bool inCorel)
+        {
+            commandBar = new ModelViews.CommandBar(inCorel);
+            commandBar.GmsPaths = new ObservableCollection<string>();
+            commandBar.CommandItems = new System.Collections.ObjectModel.ObservableCollection<ModelViews.CommandItem>();
+            commandBar.NewMessageComming += (msg) =>
+            {
+                this.Dispatcher.Invoke(() =>
+                {
+                    commandBar.Message = msg;
+
+                });
+            };
+            this.DataContext = commandBar;
         }
         private void txt_PreviewKeyUP(object sender, KeyEventArgs e)
         {

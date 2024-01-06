@@ -42,6 +42,8 @@ namespace CustomCommandBarCreator.Models
                 CopyGMS(bar);
                 GeneratorMessage?.Invoke("Merging icons");
                 InsertIcons(bar);
+                GeneratorMessage?.Invoke("Merging captions");
+                InsertCaptionStrings(bar);
                 GeneratorMessage?.Invoke("Creating the \"Config\" file");
                 CreateConfigXml(bar);
                 GeneratorMessage?.Invoke("Writing the \"Table\" file");
@@ -79,6 +81,26 @@ namespace CustomCommandBarCreator.Models
                     File.Copy(bar.GmsPaths[i], this.Folder + fileName);
                 }
             }
+        }
+        private void InsertCaptionStrings(CommandBar bar)
+        {
+            string assembly = string.Format("{0}\\Resources.dll", this.Folder);
+            string pre = "20";
+            StringResource sr = new StringResource();
+            
+           
+            sr.Name = new ResourceId(StringResource.GetBlockId(20000));
+
+            for (int i = 0; i < bar.Count; i++)
+
+            {
+                string name = pre + i.ToString("000");
+                name = pre + i.ToString("000");
+                ushort index = ushort.Parse(name);
+                sr[index] = bar[i].Caption;
+                
+            }
+            sr.SaveTo(assembly);
         }
         private void InsertIcons(CommandBar bar)
         {
@@ -221,6 +243,8 @@ namespace CustomCommandBarCreator.Models
             {
                 sb.Append("<resEntry id=\"");
                 sb.Append(commandBar[i].Guid);
+                sb.Append("\" string=\"");
+                sb.Append("20" + i.ToString("000"));
                 sb.Append("\" icon=\"");
                 sb.Append(commandBar[i].IconID);
                 sb.AppendLine("\"/>");
