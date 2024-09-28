@@ -14,10 +14,7 @@
 		<xsl:copy>
 			<xsl:apply-templates select="node()|@*"/>
 		<!--Creates a item to add a Warpper, responsible to initialize the DataSource to be consumimed in menu item above -->
-      <itemData guid="$GuidB$"
-                type="wpfhost"
-                hostedType="Addons\$Folder$\$DataSourceName$.CorelAddon,$DataSourceName$.ControlUI"
-                enable="true"/>
+    $itemDS$
 	$itemsApp$
 			</xsl:copy>
 	</xsl:template>
@@ -31,8 +28,8 @@
 							locked="true"
 							type="toolbar">
 				<toolbar>
-					<item  guidRef="$GuidB$"/>
-					$itemsRef$
+					$itemRefDS$
+$itemsRef$
 				</toolbar>
 			</commandBarData>
 		</xsl:copy>
@@ -46,5 +43,6 @@
 		<xsl:copy-of select="."/>
 		<toolbar guidRef="$GuidA$" />
 	</xsl:template>
-			$Shortcuts$
+$Customizations$
+$Shortcuts$
 </xsl:stylesheet>

@@ -10,10 +10,17 @@ namespace CustomCommandBarCreator
 
         private Action<T> _execute;
         private Func<T,bool> _canExecute;
-
+        private string displayName;
+        public string DisplayName { get { return displayName; } }
         public RelayCommand(Action<T> execute):this(execute,null)
         {
-                
+            _execute = execute;
+        }
+        public RelayCommand(Action<T> execute, Func<T, bool> canExecute,string displayName) : this(execute, null)
+        {
+            _execute = execute;
+            _canExecute = canExecute;
+            this.displayName = displayName;
         }
         public RelayCommand(Action<T> execute,Func<T,bool> canExecute)
         {

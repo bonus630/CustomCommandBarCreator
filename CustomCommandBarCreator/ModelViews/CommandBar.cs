@@ -11,6 +11,7 @@ using System.Runtime.InteropServices;
 using System.Security.Principal;
 using System.Threading;
 using System.Windows;
+using System.Windows.Input;
 using System.Windows.Threading;
 
 namespace CustomCommandBarCreator.ModelViews
@@ -21,13 +22,22 @@ namespace CustomCommandBarCreator.ModelViews
         // private bool canGenerate = false;
         public event Action<string> NewMessageComming;
         private ObservableCollection<string> gmsPaths;
-
+        private ObservableCollection<ICommand> avaliablesBuildCommands;
         public ObservableCollection<string> GmsPaths
         {
             get { return gmsPaths; }
             set
             {
                 gmsPaths = value;
+                OnPropertyChanged();
+            }
+        }   
+        public ObservableCollection<ICommand> AvaliablesBuildCommands
+        {
+            get { return avaliablesBuildCommands; }
+            set
+            {
+                avaliablesBuildCommands = value;
                 OnPropertyChanged();
             }
         }
@@ -53,6 +63,8 @@ namespace CustomCommandBarCreator.ModelViews
                 name = value;
                 OnPropertyChanged();
                 GenerateCommand.RaiseCanExecuteChanged();
+                GenerateCommandOld.RaiseCanExecuteChanged();
+                CreateSetupCommand.RaiseCanExecuteChanged();
             }
         }
 
@@ -130,6 +142,8 @@ namespace CustomCommandBarCreator.ModelViews
 
         public ObservableCollection<CorelVersionInfo> CorelVersions { get; set; }
         public RelayCommand<CommandBar> GenerateCommand { get; set; }
+        public RelayCommand<CommandBar> GenerateCommandOld { get; set; }
+        public RelayCommand<CommandBar> CreateSetupCommand { get; set; }
         public RelayCommand<CommandBar> SaveBarCommand { get; set; }
         public RelayCommand<CommandBar> SaveAsBarCommand { get; set; }
         public RelayCommand<CommandBar> LoadBarCommand { get; set; }
@@ -155,16 +169,11 @@ namespace CustomCommandBarCreator.ModelViews
             FillCorelVersion();
             SetMessage(string.Format("Welcome | Version.: {0}", Assembly.GetExecutingAssembly().GetName().Version));
         }
-        public CommandBar(bool incorel):base()
-        {
-            InitializeCommands();
-            WindowsPrincipal principal = new WindowsPrincipal(WindowsIdentity.GetCurrent());
-            IsAdmin = principal.IsInRole(WindowsBuiltInRole.Administrator);
-            FillCorelVersion();
-        }
         private void InitializeCommands()
         {
-            GenerateCommand = new RelayCommand<CommandBar>(GenereteBar, CanGenereteBar);
+            GenerateCommand = new RelayCommand<CommandBar>(GenereteBar, CanGenereteBar,"With DataSource");
+            GenerateCommandOld = new RelayCommand<CommandBar>(GenereteBarOld, CanGenereteBar,"Loaded GMS");
+            CreateSetupCommand = new RelayCommand<CommandBar>(CreateSetup, CanGenereteBar,"Create a Setup (only DataSource)");
             SaveBarCommand = new RelayCommand<CommandBar>(SaveBar);
             SaveAsBarCommand = new RelayCommand<CommandBar>(SaveAsBar);
             LoadBarCommand = new RelayCommand<CommandBar>(LoadBar);
@@ -179,6 +188,10 @@ namespace CustomCommandBarCreator.ModelViews
             SetCommand = new RelayCommand<string>(CurrentGMSSelect);
             LinkCommand = new RelayCommand<string>(LinkGMSSelect);
             InstallCommand = new RelayCommand<CorelVersionInfo>(Install, CanInstall);
+            this.AvaliablesBuildCommands = new ObservableCollection<ICommand>();
+            this.AvaliablesBuildCommands.Add(GenerateCommand);
+            this.AvaliablesBuildCommands.Add(GenerateCommandOld);
+            this.AvaliablesBuildCommands.Add(CreateSetupCommand);
         }
         private void FillCorelVersion()
         {
@@ -228,6 +241,8 @@ namespace CustomCommandBarCreator.ModelViews
                     }
                 }
                 GenerateCommand.RaiseCanExecuteChanged();
+                GenerateCommandOld.RaiseCanExecuteChanged();
+                CreateSetupCommand.RaiseCanExecuteChanged();
             }
             catch
             {
@@ -244,6 +259,8 @@ namespace CustomCommandBarCreator.ModelViews
                 }
             }
             GenerateCommand.RaiseCanExecuteChanged();
+            GenerateCommandOld.RaiseCanExecuteChanged();
+            CreateSetupCommand.RaiseCanExecuteChanged();
         }
         public void InCorel(object corelApp)
         {
@@ -263,7 +280,7 @@ namespace CustomCommandBarCreator.ModelViews
             {
                 try
                 {
-                    (app as dynamic).Quit();
+                    //(app as dynamic).Quit();
                     Marshal.ReleaseComObject(app);
                     app = null;
                     this.Attached = false;
@@ -376,6 +393,8 @@ namespace CustomCommandBarCreator.ModelViews
             this.CommandLeft--;
             AddCommandItemCommand.RaiseCanExecuteChanged();
             GenerateCommand.RaiseCanExecuteChanged();
+            GenerateCommandOld.RaiseCanExecuteChanged();
+            CreateSetupCommand.RaiseCanExecuteChanged();
         }
         private bool CanAddCommandItem(CommandItem item)
         {
@@ -393,6 +412,8 @@ namespace CustomCommandBarCreator.ModelViews
             }
             OnPropertyChanged(nameof(GmsPaths));
             GenerateCommand.RaiseCanExecuteChanged();
+            GenerateCommandOld.RaiseCanExecuteChanged();
+            CreateSetupCommand.RaiseCanExecuteChanged();
         }
         private void RemoveCommandItem(CommandItem item)
         {
@@ -441,6 +462,56 @@ namespace CustomCommandBarCreator.ModelViews
                 else
                 {
                     SetMessage("DataSource is not created, please use install button in administrator level and select your bar folder to makes a correct installation");
+                }
+            }
+            else
+                resultFolder = string.Empty;
+        }
+        private void GenereteBarOld(CommandBar bar)
+        {
+            for (int i = 0; i < this.Count; i++)
+            {
+                if (!string.IsNullOrEmpty(this[i].ShortcutText))
+                {
+                    this.HaveShortcut = true;
+                    break;
+                }
+            }
+            StructureGenerator generator = new StructureGenerator();
+            generator.GeneratorMessage += (msg) =>
+            {
+                SetMessage(msg);
+            };
+            if (generator.CreateBarOld(bar))
+            {
+
+                resultFolder = generator.Folder;
+            
+            }
+            else
+                resultFolder = string.Empty;
+        }
+        private void CreateSetup(CommandBar bar)
+        {
+            for (int i = 0; i < this.Count; i++)
+            {
+                if (!string.IsNullOrEmpty(this[i].ShortcutText))
+                {
+                    this.HaveShortcut = true;
+                    break;
+                }
+            }
+            StructureGenerator generator = new StructureGenerator();
+            generator.GeneratorMessage += (msg) =>
+            {
+                SetMessage(msg);
+            };
+            if (generator.CreateBar(bar))
+            {
+                if (generator.PrepareSetup(bar.Name))
+                {
+
+
                 }
             }
             else

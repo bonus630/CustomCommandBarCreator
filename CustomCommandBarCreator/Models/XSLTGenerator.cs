@@ -1,5 +1,6 @@
 ﻿using CustomCommandBarCreator.ModelViews;
 using System;
+using System.Data;
 using System.IO;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -8,14 +9,16 @@ namespace CustomCommandBarCreator.Models
 {
     public class XSLTGenerator
     {
-        private readonly string[] Flags = new string[] { "$itemsUser$", "$itemsApp$", "$GuidA$", "$Caption$", "$itemsRef$", "$Shortcuts$","$GuidB$","$Folder$", "$DataSourceName$" };
+        private readonly string[] Flags = new string[] { "$itemsUser$", "$itemsApp$", "$GuidA$", "$Caption$", "$itemsRef$", "$Shortcuts$","$GuidB$","$Folder$", "$DataSourceName$","$Customizations$","$itemDS$","$itemRefDS$" };
 
-        string itemsUser = "", itemsApp = "", GuidA = "", Caption = "", itemsRef = "", Shortcuts = "",GuidB ="",Folder="";
+        string itemsUser = "", itemsApp = "", GuidA = "", Caption = "", itemsRef = "", Shortcuts = "",GuidB ="",Folder="",Customizations ="";
 
         private CommandBar commandBar;
         private string folder;
         public string DsName { get; protected set; }
-
+        private string dsItemApp= "<itemData guid=\"$GuidB$\"\ntype=\"wpfhost\"\nhostedType=\"Addons\\$Folder$\\$DataSourceName$.CorelAddon,$DataSourceName$.ControlUI\"\nenable=\"true\"/>";
+        private string dsItemRefApp = "<item  guidRef=\"$GuidB$\"/>";
+        
         public XSLTGenerator(CommandBar commandBar, string folder)
         {
             this.commandBar = commandBar;
@@ -26,6 +29,7 @@ namespace CustomCommandBarCreator.Models
             this.Caption = commandBar.Name;
             this.Shortcuts = generateShortcut();
             DsName = RandomNameGenarator();
+            Customizations = generateCustomization();
         }
 
         public void GenerateUserUI()
@@ -51,14 +55,45 @@ namespace CustomCommandBarCreator.Models
             itemsApp = generateItemAPP2();
             itemsRef = generateItemREF();
 
+
+
             appui = appui.Replace(Flags[1], itemsApp);
             appui = appui.Replace(Flags[2], this.GuidA);
-            appui = appui.Replace(Flags[6], this.GuidB);
-            appui = appui.Replace(Flags[7], this.Folder);
+           // appui = appui.Replace(Flags[6], this.GuidB);
+            //appui = appui.Replace(Flags[7], this.Folder);
             appui = appui.Replace(Flags[3], Caption);
             appui = appui.Replace(Flags[4], itemsRef);
             appui = appui.Replace(Flags[5], Shortcuts);
             appui = appui.Replace(Flags[8], DsName);
+            appui = appui.Replace(Flags[9], Customizations);
+
+            dsItemApp = dsItemApp.Replace(Flags[6], this.GuidB);
+            dsItemApp = dsItemApp.Replace(Flags[7], this.Folder);
+            dsItemApp = dsItemApp.Replace(Flags[8], DsName);
+
+            dsItemRefApp = dsItemRefApp.Replace(Flags[6], this.GuidB);
+
+            appui = appui.Replace(Flags[10], dsItemApp);
+            appui = appui.Replace(Flags[11], dsItemRefApp);
+
+            File.WriteAllText(path, appui);
+        }
+        public void GenerateAppUIOld()
+        {
+
+            string path = string.Format("{0}\\AppUI.xslt", folder);
+            string appui = Properties.Resources.AppUI;
+            itemsApp = generateItemAPP();
+            itemsRef = generateItemREF();
+
+            appui = appui.Replace(Flags[1], itemsApp);
+            appui = appui.Replace(Flags[2], this.GuidA);
+            appui = appui.Replace(Flags[3], Caption);
+            appui = appui.Replace(Flags[4], itemsRef);
+            appui = appui.Replace(Flags[5], Shortcuts);
+            appui = appui.Replace(Flags[9], Customizations);
+            appui = appui.Replace(Flags[10], "");
+            appui = appui.Replace(Flags[11], "");
 
             File.WriteAllText(path, appui);
         }
@@ -66,9 +101,10 @@ namespace CustomCommandBarCreator.Models
         private string generateItemAPP()
         {
             StringBuilder sb = new StringBuilder();
+           
             for (int i = 0; i < commandBar.Count; i++)
             {
-                sb.Append("<itemData guid=\"");
+                sb.Append("\t\t\t\t\t<itemData guid=\"");
                 sb.Append(commandBar[i].Guid);
                 sb.Append("\" dynamicCommand = \"");
                 sb.Append(commandBar[i].Command);
@@ -94,7 +130,8 @@ namespace CustomCommandBarCreator.Models
             StringBuilder sb = new StringBuilder();
             for (int i = 0; i < commandBar.Count; i++)
             {
-                sb.Append("<itemData guid=\"");
+          
+                sb.Append("\t\t\t\t\t<itemData guid=\"");
                 sb.Append(commandBar[i].Guid);
                 sb.Append("\" onInvoke = \"*Bind(DataSource=");
                 sb.Append(DsName);
@@ -110,6 +147,37 @@ namespace CustomCommandBarCreator.Models
 
             }
             return sb.ToString();
+        }
+        private string generateCustomization(bool old = false)
+        {
+            //Podemos colocar um icone na barra de commandos????
+            string firstGuid = commandBar.Guid;
+            //if (old)
+            //    firstGuid = commandBar[1].Guid;
+            //else
+            //    firstGuid = this.GuidB;
+            StringBuilder sb = new StringBuilder();
+            sb.AppendLine("\t<xsl:template match=\"/uiConfig/customizationList/container\">");
+            sb.AppendLine("\t\t<xsl:copy>");
+            sb.AppendLine("\t\t\t<xsl:apply-templates select=\"node()|@*\"/>");
+            sb.Append("\t\t\t<modeData guid=\"");
+            sb.Append(firstGuid);
+            sb.AppendLine("\" >");
+            for (int i = 0; i < commandBar.Count; i++)
+            {
+                sb.Append("\t\t\t\t<!-- ");
+                sb.Append(commandBar[i].Command);
+                sb.AppendLine(" -->");
+                sb.Append("\t\t\t\t<item guidRef=\"");
+                sb.Append(commandBar[i].Guid);
+                sb.AppendLine("\" />");
+
+            }
+            sb.AppendLine("\t\t\t</modeData>");
+            sb.AppendLine("\t\t</xsl:copy>");
+            sb.AppendLine("\t</xsl:template>");
+            return sb.ToString();
+
         }
 
         private string generateItemUSER()
@@ -143,10 +211,6 @@ namespace CustomCommandBarCreator.Models
 
         private string generateShortcut()
         {
-            			
-	
-
-		
             if (!commandBar.HaveShortcut)
                 return "";
 
@@ -185,8 +249,6 @@ namespace CustomCommandBarCreator.Models
                     sb.Append(commandBar[i].Shortcuts[s].Key);
                     sb.AppendLine("</key>");
                 }
-
-
 
                 sb.AppendLine("\t\t\t\t</keySequence>");
                 sb.AppendLine("\t\t\t</xsl:if>");

@@ -33,12 +33,16 @@ namespace CustomCommandBarCreator.Views
             {
                 string vestris = "Vestris.ResourceLib.dll";
                 string msbuild = "MSBuildLogger.dll";
+                string SetupCreator = "SetupCreator.dll";
                 string appPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) + "\\" + vestris;
                 if (!File.Exists(appPath))
                     File.WriteAllBytes(appPath, Properties.Resources.Vestris_ResourceLib);
                 appPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) + "\\" + msbuild;
                 if (!File.Exists(appPath))
                     File.WriteAllBytes(appPath, Properties.Resources.MSBuildLogger);
+                appPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) + "\\" + SetupCreator;
+                if (!File.Exists(appPath))
+                    File.WriteAllBytes(appPath, Properties.Resources.SetupCreator);
             }
             catch
             {
@@ -46,23 +50,20 @@ namespace CustomCommandBarCreator.Views
                 Application.Current.Shutdown(100);
             }
             InitializeComponent();
-            InitializeDataContext(false);
+            InitializeDataContext();
             
          
             //object obj = System.Runtime.InteropServices.Marshal.GetActiveObject("CorelDRAW.Application.18");
         }
         public MainWindow(object corelApp)
         {
-          
             InitializeComponent();
-            InitializeDataContext(true);
-      
+            InitializeDataContext();
             commandBar.InCorel(corelApp);
-           
         }
-        private void InitializeDataContext(bool inCorel)
+        private void InitializeDataContext()
         {
-            commandBar = new ModelViews.CommandBar(inCorel);
+            commandBar = new ModelViews.CommandBar();
             commandBar.GmsPaths = new ObservableCollection<string>();
             commandBar.CommandItems = new System.Collections.ObjectModel.ObservableCollection<ModelViews.CommandItem>();
             commandBar.NewMessageComming += (msg) =>

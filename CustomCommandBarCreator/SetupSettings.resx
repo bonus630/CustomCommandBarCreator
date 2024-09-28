@@ -117,35 +117,4 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <assembly alias="System.Windows.Forms" name="System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />
-  <data name="AppUI" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\AppUI.xslt;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;iso-8859-1</value>
-  </data>
-  <data name="GMSLoader" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\GMSLoader.zip;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
-  <data name="IconGroup104" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Images\IconGroup104.ico;System.Drawing.Icon, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="IconsResources" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\IconsResources.dll;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
-  <data name="MSBuildLogger" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\MSBuildLogger.dll;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
-  <data name="ProjectHelper" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\ProjectHelper.dll;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
-  <data name="UserUI" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\UserUI.xslt;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;iso-8859-1</value>
-  </data>
-  <data name="Vestris_ResourceLib" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\Vestris.ResourceLib.dll;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
-  <data name="Bar" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\Bar.sln;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;utf-8</value>
-  </data>
-  <data name="SetupCreator" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\SetupCreator.dll;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;utf-8</value>
-  </data>
 </root>

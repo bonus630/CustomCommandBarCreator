@@ -37,6 +37,13 @@
     <ApplicationIcon>icon.ico</ApplicationIcon>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="ProjectHelper, Version=1.0.0.0, Culture=neutral, PublicKeyToken=378bb20a8fcd7e04, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\VSIXCallPacker2022\VSIXCallPacker\bin\Donate\ProjectHelper.dll</HintPath>
+    </Reference>
+    <Reference Include="SetupCreator">
+      <HintPath>..\..\VSIXCallPacker2022\VSIXCallPacker\bin\Donate\SetupCreator.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data" />
     <Reference Include="System.Drawing" />
@@ -95,6 +102,13 @@
     </Compile>
     <Compile Include="RelayCommand.cs" />
     <Compile Include="Serializer.cs" />
+    <Compile Include="Settings.cs" />
+    <Compile Include="SetupSettings.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="SetupSettings.Designer.cs">
+      <DependentUpon>SetupSettings.cs</DependentUpon>
+    </Compile>
     <Compile Include="TargetCreator.cs" />
     <Compile Include="Views\MainWindow.xaml.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>
@@ -117,6 +131,9 @@
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Include="SetupSettings.resx">
+      <DependentUpon>SetupSettings.cs</DependentUpon>
     </EmbeddedResource>
     <None Include="packages.config" />
     <None Include="Properties\Settings.settings">

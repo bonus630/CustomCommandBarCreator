@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-
+using System.Windows.Forms;
 namespace CustomCommandBarCreator
 {
     public class CorelVersionInfo
@@ -27,7 +27,7 @@ namespace CustomCommandBarCreator
 
         private string corelGMSPath;
         public static readonly int MinVersion = 17;
-        public static readonly int MaxVersion = 25;
+        public static readonly int MaxVersion = 26;
         //private string corelAddonsPath;
         //private string corelGMSPath64;
         //private string corelAddonsPath64;
@@ -39,18 +39,18 @@ namespace CustomCommandBarCreator
         public string CorelInstallationPath64 { get; private set; }
         public CorelIs64Bit Corel64Bit { get; set; }
         public int CorelVersion { get; private set; }
-        private static string[] corelAbb = new string[] { "10", "11", "12", "X3", "X4", "X5", "X6", "X7", "X8", "2017", "2018", "2019", "2020", "2021", "2022" };
+        private static string[] corelAbb = new string[] { "10", "11", "12", "X3", "X4", "X5", "X6", "X7", "X8", "2017", "2018", "2019", "2020", "2021", "2022", "2024" };
         private string[] corelFolderList = new string[] { "Graphics10", "Corel Graphics 11", "Corel Graphics 12",
                 "CorelDRAW Graphics Suite 13", "CorelDRAW Graphics Suite X4", "CorelDRAW Graphics Suite X5",
                 "CorelDRAW Graphics Suite X6", "CorelDRAW Graphics Suite X7", "CorelDRAW Graphics Suite X8",
                 "CorelDRAW Graphics Suite 2017","CorelDRAW Graphics Suite 2018","CorelDRAW Graphics Suite 2019","CorelDRAW Graphics Suite 2020",
-            "CorelDRAW Graphics Suite 2021","CorelDRAW Graphics Suite 2022" };
+            "CorelDRAW Graphics Suite 2021","CorelDRAW Graphics Suite 2022","CorelDRAW Graphics Suite\\25" };
         public static string GetCorelAbreviation(int version) { return corelAbb[version - 10]; }
         private const string corelName = "CorelDraw Graphics Suite";
         //private string[] corelReferenceLabel = new string[] { "", "", "", "", "", "", "", "X7Reference", "X8Reference", "X9Reference", "X10Reference", "X11Reference","X12Reference" };
         //private string[] corelBuildCopyCommandLabel = new string[] { "", "", "", "", "", "", "", "X7BuildCopyCommand", "X8BuildCopyCommand", "X9BuildCopyCommand", "X10BuildCopyCommand", "X11BuildCopyCommand", "X12BuildCopyCommand" };
         //private string[] corelStartup = new string[] { "", "", "", "", "", "", "", "X7Startup", "X8Startup", "X9Startup", "X10Startup", "X11Startup", "X12Startup" };
-        private string[] corelDebugConst = new string[] { "", "", "", "", "", "", "", "X7", "X8", "X9", "X10", "X11", "X12", "X13", "X14" };
+        private string[] corelDebugConst = new string[] { "", "", "", "", "", "", "", "X7", "X8", "X9", "X10", "X11", "X12", "X13", "X14", "X15" };
         //Corel 13 folder - CorelDRAW Graphics Suite 13
         //Corel 10 folder -  Graphics10 
 
@@ -59,9 +59,9 @@ namespace CustomCommandBarCreator
         public string CorelStartup { get { return this.corelStartup[this.CorelVersion - 10]; } }
 
 
-        private string[] corelReferenceLabel = new string[] { "", "", "", "", "", "", "", "X7Reference", "X8Reference", "X9Reference", "X10Reference", "X11Reference", "X12Reference", "X13Reference", "X14Reference" };
-        private string[] corelBuildCopyCommandLabel = new string[] { "", "", "", "", "", "", "", "X7BuildCopyCommand", "X8BuildCopyCommand", "X9BuildCopyCommand", "X10BuildCopyCommand", "X11BuildCopyCommand", "X12BuildCopyCommand", "X13BuildCopyCommand", "X14BuildCopyCommand" };
-        private string[] corelStartup = new string[] { "", "", "", "", "", "", "", "X7Startup", "X8Startup", "X9Startup", "X10Startup", "X11Startup", "X12Startup", "X13Startup", "X13Startup" };
+        private string[] corelReferenceLabel = new string[] { "", "", "", "", "", "", "", "X7Reference", "X8Reference", "X9Reference", "X10Reference", "X11Reference", "X12Reference", "X13Reference", "X14Reference", "X15Reference" };
+        private string[] corelBuildCopyCommandLabel = new string[] { "", "", "", "", "", "", "", "X7BuildCopyCommand", "X8BuildCopyCommand", "X9BuildCopyCommand", "X10BuildCopyCommand", "X11BuildCopyCommand", "X12BuildCopyCommand", "X13BuildCopyCommand", "X14BuildCopyCommand", "X15BuildCopyCommand" };
+        private string[] corelStartup = new string[] { "", "", "", "", "", "", "", "X7Startup", "X8Startup", "X9Startup", "X10Startup", "X11Startup", "X12Startup", "X13Startup", "X14Startup", "X15Startup" };
 
         public CorelVersionInfo(int corelVersion, CorelIs64Bit corel64Bit)
         {
@@ -150,7 +150,32 @@ namespace CustomCommandBarCreator
             // Parallel.ForEach() 
             return result;
         }
- 
+        public bool recoverPathManually(int corelVersion, string startDir = "")
+        {
+            OpenFileDialog fd = new OpenFileDialog();
+            fd.Filter = "|CorelDRW.exe";
+            fd.Title = "Please find EXE file of " + Corel64FullName;
+            if (!string.IsNullOrEmpty(startDir))
+                fd.InitialDirectory = startDir;
+            if (fd.ShowDialog() == DialogResult.OK)
+            {
+                FileInfo fi = new FileInfo(fd.FileName);
+                string path = fi.DirectoryName;
+                if (path.Contains("Programs64"))
+                {
+                    this.setInstallationPath(path);
+                    this.Corel64Bit = CorelIs64Bit.Corel64;
+                }
+                else
+                {
+                    this.setInstallationPath(path);
+                    this.Corel64Bit = CorelIs64Bit.Corel32;
+                }
+                return true;
+            }
+            else
+                return false;
+        }
         private bool validInstallationPath(string path)
         {
             DirectoryInfo dir = new DirectoryInfo(path);
@@ -316,8 +341,10 @@ namespace CustomCommandBarCreator
                 string path = (string)key.GetValue("");
                 path = path.Substring(1).ToLower();
                 //Corel 10 use %1
-                path = path.Replace("coreldrw.exe\" -dde", "");
-                path = path.Replace("coreldrw.exe\" %1", "");
+                if (path.Contains("coreldrw.exe"))
+                    path = path.Substring(0, path.IndexOf("coreldrw.exe"));
+                else
+                    return false;
                 key.Close();
                 if (path.Contains("programs64"))
                 {
@@ -415,3 +442,5 @@ namespace CustomCommandBarCreator
 
     }
 }
+
+
