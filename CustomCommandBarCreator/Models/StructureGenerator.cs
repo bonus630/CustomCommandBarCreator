@@ -49,7 +49,7 @@ namespace CustomCommandBarCreator.Models
                 GeneratorMessage?.Invoke("Creating the \"XSLT\" files");
                 CreateXSLT(bar);
                 GeneratorMessage?.Invoke("Coping GMS files");
-                CopyGMS(bar);
+                CopyGMS(bar,true);
                 GeneratorMessage?.Invoke("Merging icons");
                 if (!InsertIcons(bar))
                     return false;
@@ -81,7 +81,7 @@ namespace CustomCommandBarCreator.Models
                 GeneratorMessage?.Invoke("Creating the \"XSLT\" files");
                 CreateXSLTOld(bar);
                 GeneratorMessage?.Invoke("Coping GMS files");
-                CopyGMS(bar);
+                CopyGMS(bar,false);
                 GeneratorMessage?.Invoke("Merging icons");
                 if (!InsertIcons(bar))
                     return false;
@@ -174,14 +174,17 @@ namespace CustomCommandBarCreator.Models
             generator.GenerateAppUIOld();
             generator.GenerateUserUI();
         }
-        public void CopyGMS(CommandBar bar)
+        public void CopyGMS(CommandBar bar,bool newBar = true)
         {
             for (int i = 0; i < bar.GmsPaths.Count; i++)
             {
                 if (File.Exists(bar.GmsPaths[i]))
                 {
                     //obj.Substring(obj.LastIndexOf("\\") + 1).Split('.')[0];
-                    string fileName = bar.GmsPaths[i].Substring(bar.GmsPaths[i].LastIndexOf('\\')).Split('.')[0];
+                    string fileName = bar.GmsPaths[i].Substring(bar.GmsPaths[i].LastIndexOf('\\'));
+                       if(newBar)
+                            fileName = fileName.Split('.')[0];
+                    
                     File.Copy(bar.GmsPaths[i], this.Folder + fileName);
                 }
             }
