@@ -51,7 +51,13 @@ namespace CustomCommandBarCreator
                     n.Attributes.Append(attribute);
 
                     XmlNode item = doc.CreateNode(XmlNodeType.Element, "GmsFileId", "");
-                    item.InnerText = bar.GmsPaths.IndexOf(bar.GmsPaths.SingleOrDefault(r => r.Contains(bar[i].GmsPath))).ToString();
+                    var gmsPath = string.Empty;
+                    try
+                    {
+                        gmsPath = bar.GmsPaths.SingleOrDefault(r => r.Contains(bar[i].GmsPath));
+                        item.InnerText = bar.GmsPaths.IndexOf(gmsPath).ToString();
+                    }
+                    catch { }
                     n.AppendChild(item);
 
                     item = doc.CreateNode(XmlNodeType.Element, "Caption", "");
@@ -83,7 +89,10 @@ namespace CustomCommandBarCreator
 
                 doc.AppendChild(mainNode);
 
-                doc.Save(path);
+                using (FileStream stream = new FileStream(path, FileMode.OpenOrCreate, FileAccess.Write, FileShare.ReadWrite))
+                {
+                    doc.Save(stream);
+                }
                 return true;
             }
             catch { }
@@ -96,7 +105,10 @@ namespace CustomCommandBarCreator
             if (!File.Exists(path))
                 return;
             XmlDocument doc = new XmlDocument();
-            doc.Load(path);
+            using (FileStream stream = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
+            {
+                doc.Load(stream);
+            }
 
 
             bar.Name = doc.LastChild.Attributes["name"].Value;

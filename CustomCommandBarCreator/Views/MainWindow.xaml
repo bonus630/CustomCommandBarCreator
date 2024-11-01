@@ -7,7 +7,7 @@
         xmlns:converters="clr-namespace:CustomCommandBarCreator.Converters"
         xmlns:custom="clr-namespace:CustomCommandBarCreator.Custom"
         mc:Ignorable="d"
-        Title="CorelDRW CommandBar Builder for VBA Macros" Height="600" Width="940">
+        Title="CorelDRW CommandBar Builder for VBA Macros" Height="600" Width="940" Closing="Window_Closing">
     <Window.Resources>
         <ResourceDictionary>
             <converters:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter" />
@@ -82,7 +82,7 @@
                 <Label Grid.Row="0" Grid.Column="0" Content="CommandBar Name" VerticalAlignment="Center"/>
                 <TextBox Grid.Row="0" Grid.Column="1" Margin="6,6,22,6"  VerticalContentAlignment="Center"
                      Text="{Binding Name,Delay=500,UpdateSourceTrigger=PropertyChanged}"/>
-                <Label Grid.Row="0" Grid.Column="1" Margin="6" Content="*" Width="16" FontWeight="Bold" HorizontalAlignment="Right" 
+                <Label Grid.Row="0" Grid.Column="1" Margin="6" Content="*" Width="16" FontWeight="Bold" HorizontalAlignment="Right" ToolTip=""
                    Visibility="{Binding Dirty,Converter={StaticResource BoolToVisibilityConverter}}" />
 
 

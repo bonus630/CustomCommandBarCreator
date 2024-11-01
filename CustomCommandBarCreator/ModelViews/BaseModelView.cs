@@ -17,10 +17,14 @@ namespace CustomCommandBarCreator.ModelViews
         public bool Dirty
         {
             get { return dirty; }
-            set { dirty = value; 
-                OnPropertyChanged(); }
+            set { 
+                dirty = value; 
+                OnPropertyChanged();
+                DirtyChanged?.Invoke(value);
+            }
         }
         public event PropertyChangedEventHandler PropertyChanged;
+        public event Action<bool> DirtyChanged;
 
         public void OnPropertyChanged([CallerMemberName] string propertyName = "")
         {

@@ -92,6 +92,7 @@ namespace CustomCommandBarCreator.Views
                 });
             };
             this.DataContext = commandBar;
+            commandBar.Dirty = false;
         }
         private void txt_PreviewKeyUP(object sender, KeyEventArgs e)
         {
@@ -127,6 +128,22 @@ namespace CustomCommandBarCreator.Views
 
 
 
+        }
+
+        private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
+        {
+            if (commandBar != null && commandBar.Dirty)
+            {
+                MessageBoxResult result = MessageBox.Show("Would you like to save?", "CorelDRW CommandBar Builder for VBA Macros, says!", MessageBoxButton.YesNoCancel, MessageBoxImage.Question);
+                if (result == MessageBoxResult.Yes)
+                {
+                    commandBar.SaveBar(commandBar);
+                }
+                if (result == MessageBoxResult.Cancel)
+                {
+                    e.Cancel = true;
+                }
+            }
         }
     }
 }

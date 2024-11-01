@@ -398,6 +398,7 @@ namespace CustomCommandBarCreator.ModelViews
                 item = new CommandItem();
             this.CommandItems.Add(item);
             this.CommandLeft--;
+            item.DirtyChanged += (dirty) => { Dirty = dirty; };
             AddCommandItemCommand.RaiseCanExecuteChanged();
             GenerateCommand.RaiseCanExecuteChanged();
             GenerateCommandOld.RaiseCanExecuteChanged();
@@ -553,7 +554,7 @@ namespace CustomCommandBarCreator.ModelViews
             await Task.Run(action);
         }
         private string filePath = string.Empty;
-        private void SaveBar(CommandBar bar)
+        public void SaveBar(CommandBar bar)
         {
             if (string.IsNullOrEmpty(filePath))
             {
@@ -590,6 +591,7 @@ namespace CustomCommandBarCreator.ModelViews
                 return;
             NewBar(bar);
             Serializer.DeSerialize(this, path[0]);
+            filePath = path[0];
             Dirty = false;
 
         }
