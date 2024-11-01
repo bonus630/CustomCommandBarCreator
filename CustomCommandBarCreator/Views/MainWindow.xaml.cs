@@ -34,15 +34,32 @@ namespace CustomCommandBarCreator.Views
                 string vestris = "Vestris.ResourceLib.dll";
                 string msbuild = "MSBuildLogger.dll";
                 string SetupCreator = "SetupCreator.dll";
+                string iconLib = "IconLib.dll";
+
                 string appPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) + "\\" + vestris;
                 if (!File.Exists(appPath))
                     File.WriteAllBytes(appPath, Properties.Resources.Vestris_ResourceLib);
+
                 appPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) + "\\" + msbuild;
                 if (!File.Exists(appPath))
                     File.WriteAllBytes(appPath, Properties.Resources.MSBuildLogger);
+
+                appPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) + "\\" + iconLib; 
+                if (!File.Exists(appPath))
+                    File.WriteAllBytes(appPath, Properties.Resources.IconLib);
+
                 appPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) + "\\" + SetupCreator;
                 if (!File.Exists(appPath))
                     File.WriteAllBytes(appPath, Properties.Resources.SetupCreator);
+
+                appPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) + "\\CDRCommandBarBuilder.ico";
+                if (!File.Exists(appPath))
+                {
+                    using (FileStream fs = File.Create(appPath))
+                    {
+                        Properties.Resources.IconGroup104.Save(fs);
+                    }
+                }
             }
             catch
             {
@@ -51,8 +68,8 @@ namespace CustomCommandBarCreator.Views
             }
             InitializeComponent();
             InitializeDataContext();
-            
-         
+
+
             //object obj = System.Runtime.InteropServices.Marshal.GetActiveObject("CorelDRAW.Application.18");
         }
         public MainWindow(object corelApp)

@@ -37,6 +37,9 @@
     <ApplicationIcon>icon.ico</ApplicationIcon>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="IconLib">
+      <HintPath>bin\Release\IconLib.dll</HintPath>
+    </Reference>
     <Reference Include="ProjectHelper, Version=1.0.0.0, Culture=neutral, PublicKeyToken=378bb20a8fcd7e04, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\VSIXCallPacker2022\VSIXCallPacker\bin\Donate\ProjectHelper.dll</HintPath>

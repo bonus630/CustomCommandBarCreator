@@ -4,14 +4,19 @@ using System;
 using System.Collections.ObjectModel;
 using System.Diagnostics.Eventing.Reader;
 using System.Drawing;
+using System.Drawing.IconLib;
 using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Security.Principal;
 using System.Threading;
+using System.Threading.Tasks;
 using System.Windows;
+//using System.Windows.Controls;
 using System.Windows.Input;
+using System.Windows.Interop;
+//using System.Windows.Shapes;
 using System.Windows.Threading;
 
 namespace CustomCommandBarCreator.ModelViews
@@ -31,7 +36,7 @@ namespace CustomCommandBarCreator.ModelViews
                 gmsPaths = value;
                 OnPropertyChanged();
             }
-        }   
+        }
         public ObservableCollection<ICommand> AvaliablesBuildCommands
         {
             get { return avaliablesBuildCommands; }
@@ -72,7 +77,9 @@ namespace CustomCommandBarCreator.ModelViews
         public string Message
         {
             get { return message; }
-            set { message = value;
+            set
+            {
+                message = value;
                 OnPropertyChanged();
             }
         }
@@ -171,9 +178,9 @@ namespace CustomCommandBarCreator.ModelViews
         }
         private void InitializeCommands()
         {
-            GenerateCommand = new RelayCommand<CommandBar>(GenereteBar, CanGenereteBar,"With DataSource");
-            GenerateCommandOld = new RelayCommand<CommandBar>(GenereteBarOld, CanGenereteBar,"Loaded GMS");
-            CreateSetupCommand = new RelayCommand<CommandBar>(CreateSetup, CanGenereteBar,"Create a Setup (only DataSource)");
+            GenerateCommand = new RelayCommand<CommandBar>(GenereteBar, CanGenereteBar, "With DataSource");
+            GenerateCommandOld = new RelayCommand<CommandBar>(GenereteBarOld, CanGenereteBar, "Loaded GMS");
+            CreateSetupCommand = new RelayCommand<CommandBar>(CreateSetup, CanGenereteBar, "Create a Setup (only DataSource)");
             SaveBarCommand = new RelayCommand<CommandBar>(SaveBar);
             SaveAsBarCommand = new RelayCommand<CommandBar>(SaveAsBar);
             LoadBarCommand = new RelayCommand<CommandBar>(LoadBar);
@@ -436,62 +443,102 @@ namespace CustomCommandBarCreator.ModelViews
                 item.IconPath = iconPath;
         }
         private string resultFolder = string.Empty;
+
         private void GenereteBar(CommandBar bar)
         {
-            for (int i = 0; i < this.Count; i++)
-            {
-                if (!string.IsNullOrEmpty(this[i].ShortcutText))
-                {
-                    this.HaveShortcut = true;
-                    break;
-                }
-            }
+            SetMessage("Starting process. Shortcuts:" + this.HaveShortcut);
             StructureGenerator generator = new StructureGenerator();
             generator.GeneratorMessage += (msg) =>
             {
                 SetMessage(msg);
             };
-            if (generator.CreateBar(bar))
+            if (!generator.SelectFolderEmpty())
+            {
+                SetMessage("Invalid Folder!");
+                return;
+            }
+            initializeBarGeneration(() =>
             {
 
-                resultFolder = generator.Folder;
-                if (cdrVersion >= CorelVersionInfo.MinVersion)
+                if (generator.CreateBar(bar))
                 {
-                    generator.CreateDataSource(resultFolder, cdrVersion);
+
+                    resultFolder = generator.Folder;
+                    if (cdrVersion >= CorelVersionInfo.MinVersion)
+                    {
+                        generator.CreateDataSource(resultFolder, cdrVersion);
+                        SetMessage(string.Format("bar created successfully on folder \"{0}\"", resultFolder.Substring(resultFolder.LastIndexOf('\\') + 1)));
+                    }
+                    else
+                    {
+                        SetMessage("DataSource is not created, please use install button in administrator level and select your bar folder to makes a correct installation");
+                    }
                 }
                 else
-                {
-                    SetMessage("DataSource is not created, please use install button in administrator level and select your bar folder to makes a correct installation");
-                }
-            }
-            else
-                resultFolder = string.Empty;
+                    resultFolder = string.Empty;
+            });
         }
         private void GenereteBarOld(CommandBar bar)
         {
-            for (int i = 0; i < this.Count; i++)
-            {
-                if (!string.IsNullOrEmpty(this[i].ShortcutText))
-                {
-                    this.HaveShortcut = true;
-                    break;
-                }
-            }
+            SetMessage("Starting process. Shortcuts:" + this.HaveShortcut);
             StructureGenerator generator = new StructureGenerator();
             generator.GeneratorMessage += (msg) =>
             {
                 SetMessage(msg);
             };
-            if (generator.CreateBarOld(bar))
+            if (!generator.SelectFolderEmpty())
+            {
+                SetMessage("Invalid Folder!");
+                return;
+            }
+            initializeBarGeneration(() =>
             {
 
-                resultFolder = generator.Folder;
-            
-            }
-            else
-                resultFolder = string.Empty;
+                if (generator.CreateBarOld(bar))
+                {
+
+                    resultFolder = generator.Folder;
+                    SetMessage(string.Format("bar created successfully on folder \"{0}\"", resultFolder.Substring(resultFolder.LastIndexOf('\\') + 1)));
+                }
+                else
+                    resultFolder = string.Empty;
+            });
         }
         private void CreateSetup(CommandBar bar)
+        {
+            SetMessage("Starting process. Shortcuts:" + this.HaveShortcut);
+            StructureGenerator generator = new StructureGenerator();
+            generator.GeneratorMessage += (msg) =>
+            {
+                SetMessage(msg);
+            };
+            if (!generator.SelectFolderEmpty())
+            {
+                SetMessage("Invalid Folder!");
+                return;
+            }
+            generator.AllTasksFinish += () =>
+            {
+                Application.Current.Dispatcher.Invoke(() =>
+                {
+                    if (generator.PrepareSetup(bar.Name))
+                    {
+                        SetMessage("Created Setup!");
+                    }
+                });
+            };
+            initializeBarGeneration(() =>
+            {
+                if (generator.CreateBar(bar))
+                {
+                    resultFolder = generator.Folder;
+                    SetMessage(string.Format("bar created successfully on folder \"{0}\"", resultFolder.Substring(resultFolder.LastIndexOf('\\') + 1)));
+                }
+                else
+                    resultFolder = string.Empty;
+            });
+        }
+        private async void initializeBarGeneration(Action action)
         {
             for (int i = 0; i < this.Count; i++)
             {
@@ -501,21 +548,9 @@ namespace CustomCommandBarCreator.ModelViews
                     break;
                 }
             }
-            StructureGenerator generator = new StructureGenerator();
-            generator.GeneratorMessage += (msg) =>
-            {
-                SetMessage(msg);
-            };
-            if (generator.CreateBar(bar))
-            {
-                if (generator.PrepareSetup(bar.Name))
-                {
 
 
-                }
-            }
-            else
-                resultFolder = string.Empty;
+            await Task.Run(action);
         }
         private string filePath = string.Empty;
         private void SaveBar(CommandBar bar)
@@ -710,16 +745,50 @@ namespace CustomCommandBarCreator.ModelViews
         {
             string iconPath = Path.GetTempFileName();
             iconPath = iconPath.Replace(".tmp", ".ico");
-            using (Bitmap bitmap = new Bitmap(imagePath))
-            {
-                Icon icon = Icon.FromHandle(bitmap.GetHicon());
-                using (System.IO.FileStream stream = new System.IO.FileStream(iconPath, System.IO.FileMode.Create))
-                {
-                    icon.Save(stream);
-                }
-            }
+            MultiIcon mIcon = new MultiIcon();
+            SingleIcon sIcon = mIcon.Add(Path.GetFileName(imagePath));
+            Image original = Bitmap.FromFile(imagePath);
+            int size = 16;
+            if (original.Width > original.Height)
+                size = RoundDownToNearest(original.Width);
+            else
+                size = RoundDownToNearest(original.Height);
+            System.Drawing.Bitmap bitmap16 = new Bitmap(original, size, size);
+               
+            sIcon.Add(bitmap16);
+           if(size == 256)
+                sIcon[0].IconImageFormat = IconImageFormat.PNG;
+            mIcon.SelectedIndex = 0;
+            mIcon.Save(iconPath, MultiIconFormat.ICO);
+            //using (Bitmap bitmap = new Bitmap(imagePath))
+            //{
+            //    Icon icon = Icon.FromHandle(bitmap.GetHicon());
+            //    using (System.IO.FileStream stream = new System.IO.FileStream(iconPath, System.IO.FileMode.Create,FileAccess.Write,FileShare.Write))
+            //    {
+            //        icon.Save(stream);
+            //    }
+            //}
             return iconPath;
         }
+        int RoundDownToNearest(int number)
+        {
+            int[] values = { 16, 32, 48, 64, 128, 256 };
+
+            int closest = values[0];
+            foreach (int val in values)
+            {
+                if (val <= number)
+                {
+                    closest = val;
+                }
+                else
+                {
+                    break;
+                }
+            }
+            return closest;
+        }
+
     }
     enum FileType
     {

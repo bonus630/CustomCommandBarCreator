@@ -105,6 +105,16 @@ namespace CustomCommandBarCreator.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Icon similar to (Icon).
+        /// </summary>
+        internal static System.Drawing.Icon CDRCommandBarBuilder {
+            get {
+                object obj = ResourceManager.GetObject("CDRCommandBarBuilder", resourceCulture);
+                return ((System.Drawing.Icon)(obj));
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized resource of type System.Byte[].
         /// </summary>
         internal static byte[] GMSLoader {
@@ -121,6 +131,17 @@ namespace CustomCommandBarCreator.Properties {
             get {
                 object obj = ResourceManager.GetObject("IconGroup104", resourceCulture);
                 return ((System.Drawing.Icon)(obj));
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to MZ����@���	�!�L�!This program cannot be run in DOS mode.        ///
+        ///$PEL��f�!���   ��@�H�S  H.text�� � `.reloc�@B [rest of string was truncated]&quot;;.
+        /// </summary>
+        internal static byte[] IconLib {
+            get {
+                object obj = ResourceManager.GetString("IconLib", resourceCulture);
+                return ((byte[])(obj));
             }
         }
         

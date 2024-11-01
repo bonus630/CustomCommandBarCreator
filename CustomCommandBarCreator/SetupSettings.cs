@@ -59,15 +59,18 @@ namespace CustomCommandBarCreator
             {
                 XmlSerializer xmlSerializer = new XmlSerializer(typeof(Settings));
 
-                using (StreamWriter sw = new StreamWriter(xmlPath))
+                using (FileStream fileStream = new FileStream(xmlPath, FileMode.OpenOrCreate, FileAccess.Write, FileShare.Read))
                 {
-                    try
+                    using (StreamWriter sw = new StreamWriter(fileStream))
                     {
-                        xmlSerializer.Serialize(sw, this.Settings);
-                    }
-                    catch (Exception e)
-                    {
-                        MessageBox.Show(e.Message);
+                        try
+                        {
+                            xmlSerializer.Serialize(sw, this.Settings);
+                        }
+                        catch (Exception e)
+                        {
+                            MessageBox.Show(e.Message);
+                        }
                     }
                 }
             }
@@ -97,24 +100,27 @@ namespace CustomCommandBarCreator
         private void LoadSettings(string xmlPath)
         {
             XmlSerializer xmlSerializer = new XmlSerializer(typeof(Settings));
-            using (StreamReader sr = new StreamReader(xmlPath))
+            using (FileStream fileStream = new FileStream(xmlPath, FileMode.Open, FileAccess.Read, FileShare.Read))
             {
-                Settings ss = (Settings)xmlSerializer.Deserialize(sr);
+                using (StreamReader sr = new StreamReader(fileStream))
+                {
+                    Settings ss = (Settings)xmlSerializer.Deserialize(sr);
 #if (Donate || Debug)
                 Settings.OpenSite = ss.OpenSite;
                 Settings.URL = ss.URL;
 #endif
-                Settings.SetupFolder = ss.SetupFolder;
-                Settings.LogoPath = ss.LogoPath;
-                Settings.ReadmePath = ss.ReadmePath;
-                Settings.IconPath = ss.IconPath;
-                if (!string.IsNullOrEmpty(Settings.IconPath) && File.Exists(Settings.IconPath))
-                    this.Icon = new Icon(Settings.IconPath);
-                else
-                    Settings.IconPath = "";
-                Settings.Author = ss.Author;
-                Settings.Email = ss.Email;
-                LoadConfigurations();
+                    Settings.SetupFolder = ss.SetupFolder;
+                    Settings.LogoPath = ss.LogoPath;
+                    Settings.ReadmePath = ss.ReadmePath;
+                    Settings.IconPath = ss.IconPath;
+                    if (!string.IsNullOrEmpty(Settings.IconPath) && File.Exists(Settings.IconPath))
+                        this.Icon = new Icon(Settings.IconPath);
+                    else
+                        Settings.IconPath = "";
+                    Settings.Author = ss.Author;
+                    Settings.Email = ss.Email;
+                    LoadConfigurations();
+                }
             }
         }
         private void LoadConfigurations()

@@ -2,18 +2,22 @@
 using SetupCreator;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Drawing;
+using System.Drawing.IconLib;
 using System.Globalization;
 using System.IO;
 using System.IO.Compression;
 using System.IO.Packaging;
 using System.Linq;
+using System.Reflection;
 using System.Security.Policy;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-
 using System.Windows.Controls;
 using System.Windows.Forms;
+//using System.Windows.Shapes;
 using System.Xml.Linq;
 using Vestris.ResourceLib;
 
@@ -39,17 +43,17 @@ namespace CustomCommandBarCreator.Models
             {
 
 
-                if (!SelectFolderEmpty())
-                {
-                    GeneratorMessage?.Invoke("Invalid Folder!");
-                    return false;
-                }
+                //if (!SelectFolderEmpty())
+                //{
+                //    GeneratorMessage?.Invoke("Invalid Folder!");
+                //    return false;
+                //}
                 GeneratorMessage?.Invoke("Creating the \"CorelAddon\" file");
                 CreateCorelAddon();
                 GeneratorMessage?.Invoke("Creating the \"XSLT\" files");
                 CreateXSLT(bar);
                 GeneratorMessage?.Invoke("Coping GMS files");
-                CopyGMS(bar,true);
+                CopyGMS(bar, true);
                 GeneratorMessage?.Invoke("Merging icons");
                 if (!InsertIcons(bar))
                     return false;
@@ -59,7 +63,7 @@ namespace CustomCommandBarCreator.Models
                 CreateConfigXml(bar);
                 GeneratorMessage?.Invoke("Writing the \"Table\" file");
                 WriteTable(bar);
-
+                AllTasksFinish?.Invoke();
                 result = true;
             }
             catch { }
@@ -71,17 +75,17 @@ namespace CustomCommandBarCreator.Models
             bool result = false;
             try
             {
-                if (!SelectFolderEmpty())
-                {
-                    GeneratorMessage?.Invoke("Invalid Folder!");
-                    return false;
-                }
+                //if (!SelectFolderEmpty())
+                //{
+                //    GeneratorMessage?.Invoke("Invalid Folder!");
+                //    return false;
+                //}
                 GeneratorMessage?.Invoke("Creating the \"CorelAddon\" file");
                 CreateCorelAddon();
                 GeneratorMessage?.Invoke("Creating the \"XSLT\" files");
                 CreateXSLTOld(bar);
                 GeneratorMessage?.Invoke("Coping GMS files");
-                CopyGMS(bar,false);
+                CopyGMS(bar, false);
                 GeneratorMessage?.Invoke("Merging icons");
                 if (!InsertIcons(bar))
                     return false;
@@ -89,6 +93,7 @@ namespace CustomCommandBarCreator.Models
                 InsertCaptionStrings(bar);
                 GeneratorMessage?.Invoke("Creating the \"Config\" file");
                 CreateConfigXml(bar);
+                AllTasksFinish?.Invoke();
                 result = true;
             }
             catch
@@ -109,8 +114,8 @@ namespace CustomCommandBarCreator.Models
         {
             string projectDir = UnzipFiles();
             ModifyProject(projectDir, this.Folder);
-            string solutionFullName = ModifyProject2(projectDir, this.Folder,this.Folder);
-            
+            string solutionFullName = ModifyProject2(projectDir, this.Folder, this.Folder);
+
             Creator creator = new Creator(solutionFullName);
             SetupSettings setup = new SetupSettings(new FileInfo(solutionFullName));
             if (setup.ShowDialog() == DialogResult.OK)
@@ -174,7 +179,7 @@ namespace CustomCommandBarCreator.Models
             generator.GenerateAppUIOld();
             generator.GenerateUserUI();
         }
-        public void CopyGMS(CommandBar bar,bool newBar = true)
+        public void CopyGMS(CommandBar bar, bool newBar = true)
         {
             for (int i = 0; i < bar.GmsPaths.Count; i++)
             {
@@ -182,9 +187,9 @@ namespace CustomCommandBarCreator.Models
                 {
                     //obj.Substring(obj.LastIndexOf("\\") + 1).Split('.')[0];
                     string fileName = bar.GmsPaths[i].Substring(bar.GmsPaths[i].LastIndexOf('\\'));
-                       if(newBar)
-                            fileName = fileName.Split('.')[0];
-                    
+                    if (newBar)
+                        fileName = fileName.Split('.')[0];
+
                     File.Copy(bar.GmsPaths[i], this.Folder + fileName);
                 }
             }
@@ -192,24 +197,40 @@ namespace CustomCommandBarCreator.Models
         private void InsertCaptionStrings(CommandBar bar)
         {
             string assembly = string.Format("{0}\\Resources.dll", this.Folder);
-            string pre = "20";
-            StringResource sr = new StringResource();
-
-            
-            sr.Name = new ResourceId(StringResource.GetBlockId(20000));
-            sr[ushort.Parse("20000")] = bar.Name;
-            for (int i = 0; i < bar.Count; i++)
-
+            string name = string.Empty;
+            int blockId = 10000;
+            int stringId = 1;
+            //string pre = "20";
+            StringResource sr = new StringResource()
             {
-                string name = pre + (i+1).ToString("000");
-                name = pre + (i + 1).ToString("000");
-                ushort index = ushort.Parse(name);
-                sr[index] = bar[i].Caption;
+                Name = new ResourceId(StringResource.GetBlockId(blockId))
+            };
 
+            ///sr.Name = new ResourceId(StringResource.GetBlockId(blockId));
+            // name = "20000";
+            // name = ("1000");
+            sr[10000] = bar.Name;
+            for (int i = 1; i <= bar.Count; i++)
+            {
+                if (stringId >= 16)
+                {
+                    sr.SaveTo(assembly);
+
+                    sr = new StringResource();
+                    blockId += 10000;
+                    sr.Name = new ResourceId(StringResource.GetBlockId(blockId));
+                    stringId = 1;
+                }
+                ushort index = ushort.Parse((blockId / 1000).ToString() + stringId.ToString("000"));
+                sr[index] = bar[i - 1].Caption;
+                bar[i - 1].CaptionID = index;
+                stringId++;
             }
             sr.SaveTo(assembly);
+            //sr[ushort.Parse("20016")] = "bosta";
+
         }
-        public  string NormalizeText(string text)
+        public string NormalizeText(string text)
         {
             if (string.IsNullOrEmpty(text))
                 return text;
@@ -240,31 +261,73 @@ namespace CustomCommandBarCreator.Models
                 ushort iconMaxId = GetMaxIconId(assembly);
 
                 int groupIconIdCounter = StartIconId;
-                for (int i = 0; i < bar.Count; i++)
-
+                groupIconIdCounter++;
+                currentIcon = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) + "\\CDRCommandBarBuilder.ico";
+                IconDirectoryResource newIcon = new IconDirectoryResource(new IconFile(currentIcon));
+                newIcon.Name.Id = new IntPtr(groupIconIdCounter);
+                foreach (var icon in newIcon.Icons)
                 {
+                    icon.Id = ++iconMaxId;
+                }
+
+                // bar[i].IconID = newIcon.Name.Id;
+
+                int security = 0;
+                do
+                {
+                    Thread.Sleep(100);
+                    Debug.WriteLine(security);
+                    security++;
+                }
+                while (!File.Exists(assembly) && security < 10);
+                newIcon.SaveTo(assembly);
+
+
+
+
+                for (int i = 0; i < bar.Count; i++)
+                {
+                    GeneratorMessage?.Invoke(string.Format("Merging \"{0}\"", currentIcon.Substring(currentIcon.LastIndexOf('\\') + 1)));
+                    
+                    currentIcon = RewriteIcon(bar[i].IconPath);
+                    if (string.IsNullOrEmpty(currentIcon))
+                    {
+                        result = false;
+                        MessageBox.Show(string.Format("Unable to rewrite the file {0}", Path.GetFileName(bar[i].IconPath)));
+                    }
                     groupIconIdCounter++;
-                    currentIcon = bar[i].IconPath;
-                    IconDirectoryResource newIcon = new IconDirectoryResource(new IconFile(bar[i].IconPath));
+                    newIcon = new IconDirectoryResource(new IconFile(currentIcon));
                     newIcon.Name.Id = new IntPtr(groupIconIdCounter);
                     foreach (var icon in newIcon.Icons)
                     {
                         icon.Id = ++iconMaxId;
                     }
                     bar[i].IconID = newIcon.Name.Id;
-                    newIcon.SaveTo(assembly);
+                    try
+                    {
+                        newIcon.SaveTo(assembly);
+                    }
+                    catch
+                    {
+                        Thread.Sleep(100);
+                        newIcon.SaveTo(assembly);
+                    }
+
+
                 }
                 result = true;
             }
-            catch(System.ComponentModel.Win32Exception wEx)
+            catch (System.ComponentModel.Win32Exception wEx)
             {
                 GeneratorMessage?.Invoke("There was a failure in merging the icons, the bar will not function properly.");
-                MessageBox.Show(wEx.Message+" "+currentIcon);
+                MessageBox.Show(wEx.Message + " " + currentIcon);
             }
             return result;
 
         }
-        private  ushort GetMaxIconId(string assembly)
+
+
+        private ushort GetMaxIconId(string assembly)
         {
             using (var info = new ResourceInfo())
             {
@@ -278,7 +341,28 @@ namespace CustomCommandBarCreator.Models
             }
             return 0;
         }
-        private bool SelectFolderEmpty()
+        private string RewriteIcon(string imagePath)
+        {
+            string path = Path.GetTempFileName();
+            path = path.Replace(".tmp", ".ico");
+            try
+            {
+                MultiIcon mIcon = new MultiIcon();
+                using (Stream iconStream = new FileStream(imagePath, FileMode.Open, FileAccess.Read, FileShare.Read))
+                {
+                    mIcon.Load(iconStream);
+                }
+                if (mIcon[0][mIcon[0].Count-1].Icon.Width == 256)
+                    mIcon[0][mIcon[0].Count-1].IconImageFormat = IconImageFormat.PNG;
+                mIcon.Save(path, MultiIconFormat.ICO);
+            }
+            catch (Exception ex) { path = string.Empty; }
+
+            return path;
+
+        }
+
+        public bool SelectFolderEmpty()
         {
             FolderBrowserDialog fbd = new FolderBrowserDialog();
             fbd.Description = "Select a empty Folder";
@@ -383,8 +467,8 @@ namespace CustomCommandBarCreator.Models
             sb.Append("<resEntry id=\"");
             sb.Append(commandBar.Guid);
             sb.Append("\" string=\"");
-            sb.Append("20000");
-              
+            sb.Append("10000");
+
             sb.AppendLine("\"/>");
 
             for (int i = 0; i < commandBar.Count; i++)
@@ -395,7 +479,7 @@ namespace CustomCommandBarCreator.Models
                 sb.Append("<resEntry id=\"");
                 sb.Append(commandBar[i].Guid);
                 sb.Append("\" string=\"");
-                sb.Append("20" + (i+1).ToString("000"));
+                sb.Append(commandBar[i].CaptionID.ToString());
                 sb.Append("\" icon=\"");
                 sb.Append(commandBar[i].IconID);
                 sb.AppendLine("\"/>");
@@ -455,7 +539,7 @@ namespace CustomCommandBarCreator.Models
 
             }
 #if DEBUG
-           // System.Diagnostics.Process.Start(projectDir);
+            // System.Diagnostics.Process.Start(projectDir);
 #endif
             return projectDir;
 
@@ -481,7 +565,7 @@ namespace CustomCommandBarCreator.Models
 
 
         }
-        private string ModifyProject2(string projectDir,string path,string barName)
+        private string ModifyProject2(string projectDir, string path, string barName)
         {
             try
             {
@@ -489,8 +573,8 @@ namespace CustomCommandBarCreator.Models
                 string solutionDir = string.Format("{0}{1}", Path.GetTempPath(), barName);
                 try
                 {
-                    if(Directory.Exists(solutionDir))
-                        Directory.Delete(solutionDir,true);
+                    if (Directory.Exists(solutionDir))
+                        Directory.Delete(solutionDir, true);
                     Directory.CreateDirectory(solutionDir);
                 }
                 catch { }
@@ -499,7 +583,7 @@ namespace CustomCommandBarCreator.Models
                 string solution = Properties.Resources.Bar;
                 solution = solution.Replace("$ProjectName$", barName);
 #if DEBUG
-             //   System.Diagnostics.Process.Start(solutionDir);
+                //   System.Diagnostics.Process.Start(solutionDir);
 #endif
 
 
@@ -511,12 +595,12 @@ namespace CustomCommandBarCreator.Models
                 {
                     string name = files[i].Substring(files[i].LastIndexOf('\\') + 1);
                     File.Move(files[i], string.Format("{0}\\GMSLoader\\{1}", solutionDir, name));
-                    contentText.Add("<Content Include=\""+ name +"\">");
+                    contentText.Add("<Content Include=\"" + name + "\">");
                     contentText.Add("<CopyToOutputDirectory>Always</CopyToOutputDirectory>");
                     contentText.Add("</Content>");
                 }
                 contentText.Add("</ItemGroup>");
-                
+
                 string csproj = string.Format("{0}\\GMSLoader\\GMSLoader.csproj", solutionDir);
                 List<string> projectText = new List<string>(File.ReadAllLines(csproj));
                 projectText.InsertRange(projectText.Count - 2, contentText);

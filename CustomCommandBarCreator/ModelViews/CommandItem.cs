@@ -20,6 +20,17 @@ namespace CustomCommandBarCreator.ModelViews
                 OnPropertyChanged();
             }
         }
+        private ushort captionID;
+
+        public ushort CaptionID
+        {
+            get { return captionID; }
+            set
+            {
+                captionID = value;
+               
+            }
+        }
         [NonSerialized]
         private bool selected;
 
@@ -74,7 +85,8 @@ namespace CustomCommandBarCreator.ModelViews
                 "*Bind(DataSource=AppDS;Path=DocumentAvailable)",
                 "*Bind(DataSource=WPageDataSource;Path=CanInsertPage)",
                 "*GtrI(*Bind(DataSource=DrawingInfoDS;Path=NumObjects), 0)",
-                "*Bind(DataSource=WViewDataSource;Path=ToggleViewEnabled)"};
+                "*Bind(DataSource=WViewDataSource;Path=ToggleViewEnabled)",
+                "*And(*Bind(DataSource=WDocCommandsDS;Path=IsDocumentReady),*Bind(DataSource=SelectionInfoDatasource;Path=AnySelectedCanTransform))"};
 
         public ObservableCollection<string> EnableConditions
         {
@@ -108,6 +120,7 @@ namespace CustomCommandBarCreator.ModelViews
 
                 try
                 {
+                    
                     this.Icon = (new System.Drawing.Icon(iconPath).ToImageSource());
                 }
                 catch 
@@ -194,7 +207,14 @@ namespace CustomCommandBarCreator.ModelViews
         }
         private void GenerateShortcuts()
         {
+
             //ctrl+shift+alt+
+            if (string.IsNullOrEmpty(shortcutText))
+            {
+                shortcuts = new Shortcut[0];
+                return;
+
+            }
             string[] pes = shortcutText.Split(new char[] {',' }, StringSplitOptions.RemoveEmptyEntries);
             shortcuts = new Shortcut[pes.Length];
             for (int i = 0; i < pes.Length; i++)
