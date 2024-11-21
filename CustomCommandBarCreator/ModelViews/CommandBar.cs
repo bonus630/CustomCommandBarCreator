@@ -279,7 +279,7 @@ namespace CustomCommandBarCreator.ModelViews
         object app = null;
         private int cdrVersion;
 
-        private void AttachCorelDRW(object obj)
+        public void AttachCorelDRW(object obj)
         {
             if (Attached == null)
                 return;
@@ -315,7 +315,7 @@ namespace CustomCommandBarCreator.ModelViews
                         try
                         {
                             this.Attached = true;
-
+                            (app as dynamic).Visible = true;
                             cdrVersion = (app as dynamic).VersionMajor;
                             Version = string.Format("{0} {1}", (app as dynamic).Name, (app as dynamic).Version);
                         }

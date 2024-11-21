@@ -133,14 +133,13 @@ namespace CustomCommandBarCreator.Properties {
                 return ((System.Drawing.Icon)(obj));
             }
         }
-
+        
         /// <summary>
-        ///   Looks up a localized string similar to MZ����@���	�!�L�!This program cannot be run in DOS mode.        ///
-        ///$PEL��f�!���   ��@�H�S  H.text�� � `.reloc�@B [rest of string was truncated]&quot;;.
+        ///   Looks up a localized resource of type System.Byte[].
         /// </summary>
         internal static byte[] IconLib {
             get {
-                object obj = ResourceManager.GetString("IconLib", resourceCulture);
+                object obj = ResourceManager.GetObject("IconLib", resourceCulture);
                 return ((byte[])(obj));
             }
         }

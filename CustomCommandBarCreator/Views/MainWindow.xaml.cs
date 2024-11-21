@@ -143,7 +143,15 @@ namespace CustomCommandBarCreator.Views
                 {
                     e.Cancel = true;
                 }
+                else
+                {
+                    if((bool)this.commandBar.Attached)
+                        this.commandBar.AttachCorelDRW(commandBar);
+                }
             }
+            if ((bool)this.commandBar.Attached)
+                this.commandBar.AttachCorelDRW(commandBar);
+
         }
     }
 }

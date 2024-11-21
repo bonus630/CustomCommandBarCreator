@@ -210,9 +210,10 @@
                             <GridViewColumn Header="Command" Width="140">
                                 <GridViewColumn.CellTemplate>
                                     <DataTemplate>
+                                        <Grid>
                                         <!--<TextBox Text="{Binding Command}" Width="120"  Margin="2"/>-->
-                                        <ComboBox ItemsSource="{Binding Commands}" Text="{Binding Command}" IsEditable="True" Width="120" Margin="2"/>
-
+                                        <ComboBox ItemsSource="{Binding Commands}" Text="{Binding Command}" IsEditable="True" Width="120"   Margin="2"/>
+                                        </Grid>
                                     </DataTemplate>
                                 </GridViewColumn.CellTemplate>
                             </GridViewColumn>
