@@ -438,7 +438,8 @@ namespace CustomCommandBarCreator.ModelViews
             FileInfo fi = new FileInfo(iconPath);
             if (!fi.Extension.Equals(".ico"))
             {
-                iconPath = this.ContertToIcon(iconPath);
+                IconCreator ic = new IconCreator();
+                iconPath = ic.ContertToIcon(iconPath);
             }
             if (File.Exists(iconPath))
                 item.IconPath = iconPath;
@@ -743,53 +744,53 @@ namespace CustomCommandBarCreator.ModelViews
             return canInstall;
         }
 
-        public string ContertToIcon(string imagePath)
-        {
-            string iconPath = Path.GetTempFileName();
-            iconPath = iconPath.Replace(".tmp", ".ico");
-            MultiIcon mIcon = new MultiIcon();
-            SingleIcon sIcon = mIcon.Add(Path.GetFileName(imagePath));
-            Image original = Bitmap.FromFile(imagePath);
-            int size = 16;
-            if (original.Width > original.Height)
-                size = RoundDownToNearest(original.Width);
-            else
-                size = RoundDownToNearest(original.Height);
-            System.Drawing.Bitmap bitmap16 = new Bitmap(original, size, size);
+        //public string ContertToIcon(string imagePath)
+        //{
+        //    string iconPath = Path.GetTempFileName();
+        //    iconPath = iconPath.Replace(".tmp", ".ico");
+        //    MultiIcon mIcon = new MultiIcon();
+        //    SingleIcon sIcon = mIcon.Add(Path.GetFileName(imagePath));
+        //    Image original = Bitmap.FromFile(imagePath);
+        //    int size = 16;
+        //    if (original.Width > original.Height)
+        //        size = RoundDownToNearest(original.Width);
+        //    else
+        //        size = RoundDownToNearest(original.Height);
+        //    System.Drawing.Bitmap bitmap16 = new Bitmap(original, size, size);
                
-            sIcon.Add(bitmap16);
-           if(size == 256)
-                sIcon[0].IconImageFormat = IconImageFormat.PNG;
-            mIcon.SelectedIndex = 0;
-            mIcon.Save(iconPath, MultiIconFormat.ICO);
-            //using (Bitmap bitmap = new Bitmap(imagePath))
-            //{
-            //    Icon icon = Icon.FromHandle(bitmap.GetHicon());
-            //    using (System.IO.FileStream stream = new System.IO.FileStream(iconPath, System.IO.FileMode.Create,FileAccess.Write,FileShare.Write))
-            //    {
-            //        icon.Save(stream);
-            //    }
-            //}
-            return iconPath;
-        }
-        int RoundDownToNearest(int number)
-        {
-            int[] values = { 16, 32, 48, 64, 128, 256 };
+        //    sIcon.Add(bitmap16);
+        //   if(size == 256)
+        //        sIcon[0].IconImageFormat = IconImageFormat.PNG;
+        //    mIcon.SelectedIndex = 0;
+        //    mIcon.Save(iconPath, MultiIconFormat.ICO);
+        //    //using (Bitmap bitmap = new Bitmap(imagePath))
+        //    //{
+        //    //    Icon icon = Icon.FromHandle(bitmap.GetHicon());
+        //    //    using (System.IO.FileStream stream = new System.IO.FileStream(iconPath, System.IO.FileMode.Create,FileAccess.Write,FileShare.Write))
+        //    //    {
+        //    //        icon.Save(stream);
+        //    //    }
+        //    //}
+        //    return iconPath;
+        //}
+        //int RoundDownToNearest(int number)
+        //{
+        //    int[] values = { 16, 32, 48, 64, 128, 256 };
 
-            int closest = values[0];
-            foreach (int val in values)
-            {
-                if (val <= number)
-                {
-                    closest = val;
-                }
-                else
-                {
-                    break;
-                }
-            }
-            return closest;
-        }
+        //    int closest = values[0];
+        //    foreach (int val in values)
+        //    {
+        //        if (val <= number)
+        //        {
+        //            closest = val;
+        //        }
+        //        else
+        //        {
+        //            break;
+        //        }
+        //    }
+        //    return closest;
+        //}
 
     }
     enum FileType

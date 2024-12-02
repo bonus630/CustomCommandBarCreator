@@ -96,6 +96,7 @@
       <DependentUpon>ShortcutTextBox.xaml</DependentUpon>
     </Compile>
     <Compile Include="Models\Extensions.cs" />
+    <Compile Include="Models\IconCreator.cs" />
     <Compile Include="Models\StructureGenerator.cs" />
     <Compile Include="Models\XSLTGenerator.cs" />
     <Compile Include="ModelViews\Shortcut.cs" />

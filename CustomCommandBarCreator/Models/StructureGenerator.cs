@@ -284,12 +284,12 @@ namespace CustomCommandBarCreator.Models
 
 
 
-
+                IconCreator ic = new IconCreator();
                 for (int i = 0; i < bar.Count; i++)
                 {
                     GeneratorMessage?.Invoke(string.Format("Merging \"{0}\"", currentIcon.Substring(currentIcon.LastIndexOf('\\') + 1)));
                     
-                    currentIcon = RewriteIcon(bar[i].IconPath);
+                    currentIcon = ic.RewriteIcon(bar[i].IconPath);
                     if (string.IsNullOrEmpty(currentIcon))
                     {
                         result = false;
@@ -341,26 +341,26 @@ namespace CustomCommandBarCreator.Models
             }
             return 0;
         }
-        private string RewriteIcon(string imagePath)
-        {
-            string path = Path.GetTempFileName();
-            path = path.Replace(".tmp", ".ico");
-            try
-            {
-                MultiIcon mIcon = new MultiIcon();
-                using (Stream iconStream = new FileStream(imagePath, FileMode.Open, FileAccess.Read, FileShare.Read))
-                {
-                    mIcon.Load(iconStream);
-                }
-                if (mIcon[0][mIcon[0].Count-1].Icon.Width == 256)
-                    mIcon[0][mIcon[0].Count-1].IconImageFormat = IconImageFormat.PNG;
-                mIcon.Save(path, MultiIconFormat.ICO);
-            }
-            catch (Exception ex) { path = string.Empty; }
+        //private string RewriteIcon(string imagePath)
+        //{
+        //    string path = Path.GetTempFileName();
+        //    path = path.Replace(".tmp", ".ico");
+        //    try
+        //    {
+        //        MultiIcon mIcon = new MultiIcon();
+        //        using (Stream iconStream = new FileStream(imagePath, FileMode.Open, FileAccess.Read, FileShare.Read))
+        //        {
+        //            mIcon.Load(iconStream);
+        //        }
+        //        if (mIcon[0][mIcon[0].Count-1].Icon.Width == 256)
+        //            mIcon[0][mIcon[0].Count-1].IconImageFormat = IconImageFormat.PNG;
+        //        mIcon.Save(path, MultiIconFormat.ICO);
+        //    }
+        //    catch (Exception ex) { path = string.Empty; }
 
-            return path;
+        //    return path;
 
-        }
+        //}
 
         public bool SelectFolderEmpty()
         {
