@@ -38,7 +38,8 @@
     <ApplicationIcon>icon.ico</ApplicationIcon>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="IconLib">
+    <Reference Include="IconLib, Version=0.74.0.0, Culture=neutral, PublicKeyToken=6c1b82c863a82aea, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
       <HintPath>bin\Release\IconLib.dll</HintPath>
     </Reference>
     <Reference Include="ProjectHelper, Version=1.0.0.0, Culture=neutral, PublicKeyToken=378bb20a8fcd7e04, processorArchitecture=MSIL">
@@ -171,9 +172,6 @@
   </ItemGroup>
   <ItemGroup>
     <Resource Include="icon.ico" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="bin\Release\Vestris.ResourceLib.dll" />
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Images\checked.png" />

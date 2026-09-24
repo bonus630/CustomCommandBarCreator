@@ -128,6 +128,7 @@ namespace CustomCommandBarCreator.ModelViews
             get { return version; }
             set { version = value; OnPropertyChanged(); }
         }
+        public string AppVersion { get { return string.Format("Version: {0}", Assembly.GetExecutingAssembly().GetName().Version); } }
         private string attachButtonText = "Attach in a CorelDRW";
 
         public string AttachButtonText
@@ -146,6 +147,7 @@ namespace CustomCommandBarCreator.ModelViews
             get { return commandLeft; }
             set { commandLeft = value; OnPropertyChanged(); }
         }
+   
 
         public ObservableCollection<CorelVersionInfo> CorelVersions { get; set; }
         public RelayCommand<CommandBar> GenerateCommand { get; set; }

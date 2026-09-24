@@ -58,6 +58,9 @@
                         </MenuItem.Icon>
                     </MenuItem>
                 </MenuItem>
+                <MenuItem Header="Help">
+                    <MenuItem Header="{Binding AppVersion}" />
+                </MenuItem>
             </Menu>
 
         </Grid>
