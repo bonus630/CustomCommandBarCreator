@@ -90,13 +90,13 @@ namespace CustomCommandBarCreator.Properties {
         ///# Visual Studio Version 17
         ///VisualStudioVersion = 17.6.33723.286
         ///MinimumVisualStudioVersion = 10.0.40219.1
-        ///Project(&quot;{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}&quot;) = &quot;$ProjectName$&quot;, &quot;GMSLoader\GMSLoader.csproj&quot;, &quot;{8CD4556C-95AF-423F-B5EA-F87E061163FD}&quot;
+        ///Project(&quot;{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}&quot;) = &quot;$ProjectName$&quot;, &quot;$ProjectName$\$ProjectName$.csproj&quot;, &quot;{8CD4556C-95AF-423F-B5EA-F87E061163FD}&quot;
         ///EndProject
         ///Global
         ///	GlobalSection(SolutionConfigurationPlatforms) = preSolution
         ///		2017 Debug|Any CPU = 2017 Debug|Any CPU
         ///		2017 Release|Any CPU = 2017 Release|Any CPU
-        ///		2018 Debug|Any CPU = 2018 [rest of string was truncated]&quot;;.
+        ///		2018 Debug|Any CP [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string Bar {
             get {

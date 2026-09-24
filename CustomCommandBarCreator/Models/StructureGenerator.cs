@@ -41,8 +41,6 @@ namespace CustomCommandBarCreator.Models
             bool result = false;
             try
             {
-
-
                 //if (!SelectFolderEmpty())
                 //{
                 //    GeneratorMessage?.Invoke("Invalid Folder!");
